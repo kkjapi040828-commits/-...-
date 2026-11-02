@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         DLsite 언어 고정 + 일본 이벤트 + 할인 배너만
 // @namespace    dlsite-locale-filter
-// @version      0.39.1
-// @description  (테스트중: 0.38~0.39 실제 폰 확인 전) 사이트 원래 화면은 그대로 두고: 언어 고정, 이벤트 페이지 자동 일본어, 할인 외 배너 숨김, 목록 할인·쿠폰 필터·성우 표시 (성능·태그 검색 최적화).
+// @version      0.42.2
+// @description  (테스트중: 0.38~0.41 실제 폰 확인 전) 사이트 원래 화면은 그대로 두고: 언어 고정, 이벤트 페이지 자동 일본어, 할인 외 배너 숨김, 목록 할인·쿠폰 필터·성우 표시 (성능·태그 검색 최적화).
 // @match        https://www.dlsite.com/*
 // @match        https://play.dlsite.com/*
 // @grant        GM_getValue
@@ -30,6 +30,38 @@
  *  10. panel    설정 버튼과 바텀 시트 설정 창.
  *  10.5 play    DLsite Play(play.dlsite.com)에서 작품 숨기기(Play 자체 비표시)·품번 띠. Play에서는 이것만 돈다.
  *  11. boot     시작과 화면 변화 감시.
+ *
+ * 0.42.2
+ *   - 칩 줄: 그 화면에서 못 쓰는 칩(대상·언어·정렬)은 빼지 않고 흐리게 자리만 둔다(화면마다 줄 모양이 같게).
+ *
+ * 0.42.1
+ *   - 아래 한/일 알약: 스크롤해도 숨거나 움직이지 않고 고정(애니메이션·scroll 감시 삭제).
+ *
+ * 0.42.0
+ *   - 시안 ui-0.42: 카드(품번 위 틈 줄임, サンプル/カート 줄·빨간 할인 띠 숨김, 할인율은 가격 옆 딱지), 칩은 글자 폭+▾·가로 스크롤, 아래 한/일 알약은 내려갈 때 숨김(0.42.1에서 고정으로 바뀜).
+ *   - 필터 버튼 = 우리 필터 창(대상·형식·장르·할인·언어, 🔖 사이트 검색 조건 저장·리셋·검색하기). 메뉴(바로가기 칸·이벤트)·설정(묶음)·차단(서클·성우·작가 칸)·바로가기 편집(끌기·지우기·추가) 새로 그림.
+ *   - buildPanel 다시 씀, list.filterSpec·saleTag·syncFab, 바로가기 기본에 검색조건. 저장 키는 그대로(shortcuts.custom·block.list) + block.kind.
+ *
+ * 0.41.3
+ *   - 대상 칩 형식을 망가·ASMR·보이스 3칸으로(주소 work_category × work_type_category comic·audio). 기본 = TL + ASMR·보이스(동인·드라마 × audio, 전엔 동인 보이스만). SEXES·FORMS·floorRead·floorPairs, floorChip·sheet.openFloor.
+ *
+ * 0.41.2
+ *   - 검색 기본 조건: 신작순(order/release_d)·TL+보이스(sex_category female + work_type SOU)를 주소에 없으면 붙임(이름 검색·쿠폰 대상 제외). 사이트 검색창(from/fs.header)의 trend·TL+BL도 바꿈. DEF_ORDER·DEF_FLOOR, searchRedirectTarget·floorChip·sortChip·goOrder·resetAll.
+ *
+ * 0.41.1
+ *   - 태그 후보·자주 쓰는 태그 = 태그 이름(한·일)으로 글자 검색(제목·본문·태그 모두, 태그 번호보다 2배쯤 많음). '#'로 시작할 때만 태그 번호. tags.word·words, sbox.parts, list.openBulk.
+ *   - '#근친'처럼 태그가 아니면 #를 떼고 글자 검색(전엔 0개). 여러 단어는 단어마다 일본어를 붙임, 태그 아닌 짝 KW_EXTRA(근친|近親). kw.expand·expandOne·before.
+ *
+ * 0.41.0
+ *   - 새 화면 구조: 칩 5칸(대상·언어·할인·쿠폰·정렬) 한 줄, 칩=팝업·✕=끄기. 아래 고정 '필터 N/적용' + 한/일 알약(꾹=메뉴, ⚙=설정). 사이트 정렬·선택 조건 줄·'작품 페이지로' 숨김.
+ *   - 없앰: 칩 순서·보이기 설정, 상태 구역, 알약 끌기(위치 고정), 필터·↺ 칩. list.syncFab·onApply.
+ *
+ * 0.40.0
+ *   - 칩을 글자(켜기/끄기)와 ▾(목록)로 나눔. 정렬을 칩으로 분리(인기·신작·할인 개시·저가·판매·리뷰·평가). 검색 화면에서 고른 조건은 '적용'에서 한 번에 연다. list.staged·curPath·stage·sortChip.
+ *
+ * 0.39.2
+ *   - 층 칩: 코믹→망가, ASMR 칸 추가(주소 work_type/SOU, 동인·드라마 안의 작품 형식). 검색창 '#임신,순애' = 태그 번호 검색(쉼표로 여러 개, 그리고). tags.goAll·parse.
+ *   - 필터 칩은 줄 3개 아이콘. 품번 줄 여백 줄임. 저장한 검색 보관 1시간 → 5분.
  *
  * 0.39.1
  *   - 묶음 할인 화면에 검색 칩: 글자(한국어 태그 이름이면 일본어도) 또는 태그 후보로 그 묶음 안에서 거름(주소 ?keyword=·?genre[n]=, 사이트가 거름). openBulk.
@@ -211,8 +243,6 @@
     'sb.rate': 0, // 필터: 최소 할인율(0이면 끔)
     'sb.coupon': '', // 쿠폰 대상만: 빈 값이면 끔, '*'이면 아는 모든 쿠폰, 그 외는 쿠폰 id 하나
     hideAI: false, // AI 생성 작품 숨기기
-    'fab.xy': null, // 끌어서 옮긴 버튼 위치 {l, t}(px). 예전 값 {x, y}(화면 비율 0~1)도 읽는다. 없으면 아래 fab.pos
-    'fab.pos': 'rm', // 버튼 위치: rm 오른쪽 가운데, rt 오른쪽 위, rb 오른쪽 아래, lm 왼쪽 가운데
   };
   const KEEP_HREF = /\/(?:campaign\b(?!\/tutorial)|bulkbuy\b)|discount|coupon|(?:^|[^a-z])sale(?![a-z])/i; // 남길 배너(주소)
   const KEEP_TEXT = /セール|割引|%\s*OFF|(?:^|[^a-z])OFF(?![a-z])|まとめ買い|クーポン|\d+本\d+円|할인|세일|쿠폰|(?:^|[^a-z])sale(?![a-z])|coupon|discount/i; // 남길 배너(글자)
@@ -235,7 +265,7 @@
   const blockSet = () => blockSet.cache || (blockSet.cache = new Set(String(store.get('block.list', '')).split('\n').map(normName).filter(Boolean)));
   const PRICE_RE = /\d[\d,.]*\s*(?:円|JPY|원|KRW|USD|CNY|TWD|HKD|EUR|元)|[$₩¥€]\s*\d/i; // 가격이 그려졌는지 판단(늦게 로드되는 카드 대응)
   const PID_RE = /product_id\/([A-Za-z]{2}\d{6,8})/;
-  const OURS = '#dlh,#dlsale,#dlbar,#dlsheet,.dlva,.dlpn,.dlx,.dlw,.dlcp,.dlrow'; // 이 스크립트가 만든 요소
+  const OURS = '#dlh,#dlsale,#dlbar,#dlsheet,.dlva,.dlpn,.dlx,.dlw,.dlcp,.dlrow,.dlsl'; // 이 스크립트가 만든 요소
   const CACHE_MS = 2 * 3600 * 1000; // 일본어 첫 화면(할인 배너·이벤트 목록) 캐시. 30분 → 2시간(요청 1/4, 0.38.1)
   const RATE_STEPS = [0, 30, 50, 80]; // 할인 팝업에서 고르는 최소 할인율(0 = 할인중). 사이트 필터와 같은 값
   const DLW_URL = (id) => `https://dlwatcher.com/product/${encodeURIComponent(id)}`;
@@ -249,6 +279,7 @@
   const SHORTCUTS = [
     ['👤', '마이페이지', 'https://www.dlsite.com/girls-touch/mypage/user'],
     ['⭐', '즐겨찾기', 'https://www.dlsite.com/girls-touch/mypage/wishlist'],
+    ['🔍', '검색조건', 'https://www.dlsite.com/girls-touch/mypage/searchword'], // 사이트 '저장한 검색조건'(0.42.0 시안)
   ];
 
   /* ========== 2. store ========== */
@@ -420,6 +451,11 @@
     if (opt('saleOnly') && !off.sale && !/\/campaign\/campaign/.test(p) && !/discount_rates/.test(p) && !/\/is_free/.test(p) && !COUPON_RE.test(p) && !NAME_SEARCH.test(p)) np += '/campaign/campaign';
     // 작품 언어를 안 정한 검색은 한국어(+언어 불필요)로. 이름 검색·쿠폰 대상 검색은 일본어 작품이 많아 그대로 둔다
     if (opt('koDefault') && !off.lang && /^\/girls(-touch)?\/fsr\//.test(p) && !/options(?:%5B|\[)/i.test(p) && !COUPON_RE.test(p) && !NAME_SEARCH.test(p)) np += '/options%5B0%5D/KO_KR/options%5B1%5D/NM';
+    // 기본 정렬(신작순)·대상(TL+보이스). 사이트 검색창에서 왔으면 사이트가 넣은 trend·TL+BL을 우리 기본으로 바꾼다
+    const hdr = HEADER_SEARCH.test(p), ord = pathGet(np, 'order');
+    if (/\/fsr\/=/.test(p) && !COUPON_RE.test(p) && (ord === undefined || (hdr && ord === 'trend'))) np = pathSet(np, ['order', 'page'], [['order%5B0%5D', DEF_ORDER]]);
+    if (!off.floor && floorDefOk(p) && (floorUnset(np) || hdr)) np = pathSet(np, [...FLOOR_KEYS, 'work_type_name', 'page'], floorDefPairs());
+    if (hdr) np = pathSet(np, ['from'], []);
     np = kw.path(np) || np; // 한국어 태그 이름 검색어에 일본어 이름을 '또는'으로(검색창에서 못 바꾼 경우)
     const u = new URL(location.href);
     if (gp) u.search = '';
@@ -451,6 +487,8 @@
   const TAGS_KEY = 'tags1';
   const TAGS_TTL = 7 * 864e5;
   const HANGUL = /[가-힣]/;
+  // 태그가 아닌 말의 짝(사람이 넣음). 근친은 TL 층 태그에 없다(2026-11-02 확인: 근친 881 / 近親 984 / 근친|近親 984)
+  const KW_EXTRA = [['근친', '近親']];
   const kw = {
     list() { const c = store.get(TAGS_KEY, null); return c && Array.isArray(c.list) ? c.list : []; }, // [[번호, 한국어, 일본어]]
     _busy: null,
@@ -479,7 +517,7 @@
     pairs() {
       const list = kw.list();
       if (kw._pairsOf === list.length && kw._pairs) return kw._pairs;
-      const out = [];
+      const out = [...KW_EXTRA];
       for (const [, ko, ja] of list) {
         out.push([ko, ja]);
         const m = ko.match(/^(.{2,})\s(공|수)$/), j = m && ja.match(m[2] === '공' ? /^(.+?)攻め?$/ : /^(.+?)受け?$/);
@@ -489,9 +527,17 @@
       return (kw._pairs = out);
     },
     // 한국어 검색어 → '한국어|일본어…'. 바꿀 게 없으면 null. 띄어쓰기는 태그 이름 하나와 같을 때만(연하 공 → 연하공|年下攻め), 아니면 여러 단어라 그대로
+    // 여러 단어면(태그 이름 하나와 같지 않을 때) 단어마다 붙인다: 임신 근친 → 임신|妊娠|孕ませ 근친|近親. 사이트는 '|'를 띄어쓰기보다 먼저 묶는다(2026-11-02: 近親 妊娠 135 / 근친|近親 임신|妊娠 147)
     expand(word) {
       const raw = String(word || '').trim();
       if (!raw || /\|/.test(raw) || !HANGUL.test(raw)) return null;
+      const one = kw.expandOne(raw);
+      if (one || !/\s/.test(raw)) return one;
+      const ws = raw.split(/\s+/), xs = ws.map((x) => kw.expandOne(x) || x);
+      return xs.some((x, i) => x !== ws[i]) ? xs.join(' ') : null;
+    },
+    expandOne(raw) {
+      if (!HANGUL.test(raw)) return null;
       const w = raw.replace(/\s+/g, '');
       const out = [];
       for (const [ko, ja] of kw.pairs()) {
@@ -510,7 +556,7 @@
       let d = '';
       try { d = decodeURIComponent(k.replace(/\+/g, ' ')); } catch (e) { return null; }
       const x = kw.expand(d);
-      return x ? pathSet(pathname, ['keyword', 'page'], [['keyword', encodeURIComponent(x)]]) : null;
+      return x ? pathSet(pathname, ['keyword', 'page'], [['keyword', encodeURIComponent(x).replace(/%20/g, '+')]]) : null; // 띄어쓰기는 '+'(주소에 %20을 넣은 요청은 응답이 없었다, 2026-11-02)
     },
     // 사이트 검색창에서 검색하기 직전(제출·Enter·검색 버튼, 사이트보다 먼저)에 글자를 바꾼다. 그러면 요청이 늘지 않는다
     before(e) {
@@ -521,7 +567,12 @@
       else { const f = t.closest && t.closest('.globalSearchBtn, #search_button'); inp = f && f.closest('form') && f.closest('form').querySelector('input[name=keyword]'); }
       if (inp && inp.value.trim()) sbox.remember(inp.value.trim());
       if (inp && sheet.opener === inp) sheet.close(); // 검색하면 검색창 목록은 닫는다
-      const x = inp && kw.expand(inp.value);
+      const ns = inp && tags.parse(inp.value); // '#임신,순애': 태그 번호로 검색(그리고)
+      if (ns) { e.preventDefault(); e.stopPropagation(); tags.goAll(ns); return; }
+      // '#근친'처럼 태그가 아닌 조각이 있으면 #를 떼고 글자 검색(전엔 '#근친' 그대로 검색해 0개, 2026-11-02)
+      const ps = inp && tags.pieces(inp.value.trim());
+      const v = ps && ps.length ? ps.filter(Boolean).join(' ') : inp && inp.value;
+      const x = inp && (kw.expand(v) || (v !== inp.value ? v : null));
       if (!x) return;
       inp.value = x;
       inp.dispatchEvent(new Event('input', { bubbles: true })); // 사이트(Vue)가 값을 들고 있으면 같이 바뀌게
@@ -588,6 +639,7 @@
     hf: 'M480-147q-14 0-28.5-5T426-168l-69-63q-106-97-191.5-192.5T80-634q0-94 63-157t157-63q53 0 100 22.5t80 61.5q33-39 80-61.5T660-854q94 0 157 63t63 157q0 115-85 211T602-230l-68 62q-11 11-25.5 16t-28.5 5Z',
     tk: 'M160-200q-33 0-56.5-23.5T80-280v-120q33 0 56.5-23.5T160-480q0-33-23.5-56.5T80-560v-120q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v120q-33 0-56.5 23.5T800-480q0 33 23.5 56.5T880-400v120q0 33-23.5 56.5T800-200H160Z', // 쿠폰(직접 그림)
     dn: 'M480-362q-8 0-15-2.5t-13-8.5L268-557q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-373q-6 6-13 8.5t-15 2.5Z',
+    fl: 'M440-240q-17 0-28.5-11.5T400-280q0-17 11.5-28.5T440-320h80q17 0 28.5 11.5T560-280q0 17-11.5 28.5T520-240h-80ZM280-440q-17 0-28.5-11.5T240-480q0-17 11.5-28.5T280-520h400q17 0 28.5 11.5T720-480q0 17-11.5 28.5T680-440H280ZM160-640q-17 0-28.5-11.5T120-680q0-17 11.5-28.5T160-720h640q17 0 28.5 11.5T840-680q0 17-11.5 28.5T800-640H160Z', // 필터(줄 3개)
     ck: 'm382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z',
   };
   function icon(k) {
@@ -602,7 +654,16 @@
   }
   // 할인 팝업의 정렬: 검색 주소의 order 값(2026-10-30 사이트 정렬 창에서 확인, cstart_d·cend는 할인 작품 검색일 때 사이트에도 나옴). trend = 사이트 기본
   // 2026-10-31 사이트 정렬 창에서 확인: 신작 release_d, 판매수 dl_d. cstart_d·cend는 할인 작품 검색일 때만 사이트에 있다
-  const SALE_SORTS = [['cstart_d', '할인 개시일 새로운순', '개시순'], ['cend', '마감 임박순', '마감순'], ['release_d', '신작순', '신작순'], ['dl_d', '판매 많은순', '판매순'], ['price', '저가순', '저가순'], ['trend', '인기순', '']];
+  // 정렬 칩(0.40.0): 사용자가 고른 7개. 할인 개시순은 할인 검색일 때만(마감 임박순·오래된순·고가순은 뺌). 세 번째 값은 칩 글자
+  const SORTS = [['trend', '인기순', '인기'], ['release_d', '신작순', '신작'], ['cstart_d', '할인 개시일 새로운순', '개시'], ['price', '저가순', '저가'], ['dl_d', '판매 많은순', '판매'], ['review_d', '리뷰 많은순', '리뷰'], ['rate_d', '평가 높은순', '평가']];
+  // 검색 기본 조건(2026-11-02 사용자 결정): 신작순 · 한국어(koDefault) · TL + ASMR·보이스(FORMS) · 할인 없음 · 쿠폰 없음.
+  // 주소에 정렬·대상이 없을 때 붙인다. 사이트 검색창(주소 끝 from/fs.header)은 정렬 trend·대상 TL+BL을 스스로 넣어서, 그때는 우리 기본으로 바꾸고 from을 뺀다
+  const DEF_ORDER = 'release_d';
+  const DEF_FLOOR = { sex: ['female'], forms: ['asmr', 'voice'] }; // TL + ASMR(동인 보이스)·보이스(드라마CD) = 동인·드라마 × audio
+  const HEADER_SEARCH = /\/from\/fs\.header(?:\/|$)/;
+  const floorDefOk = (p) => /\/fsr\/=/.test(p) && !COUPON_RE.test(p) && !NAME_SEARCH.test(p); // 이름 검색·쿠폰 대상은 대상 기본을 안 붙임(만화 작가 등)
+  const floorUnset = (p) => { const pp = pathPairs(p); return !!pp && !pp.pairs.some((x) => ['sex_category', 'work_type', 'work_type_category'].includes(segKey(x[0]))); };
+  const floorDefPairs = () => floorPairs(DEF_FLOOR);
   // 검색 주소 읽기·고치기. 사이트는 누를 때 주소를 order%5B0%5D/cend처럼 바꾸므로 [n]·%5Bn%5D는 무시하고 키로 본다
   const segKey = (k) => { try { k = decodeURIComponent(k); } catch (e) { /* 그대로 */ } return k.replace(/\[\d*\]$/, ''); };
   function pathPairs(pathname) {
@@ -617,11 +678,13 @@
     const p = pathPairs(pathname);
     return p ? p.head + [...p.pairs.filter((x) => !drop.includes(segKey(x[0]))), ...add].map((x) => x.join('/')).join('/') : pathname;
   };
-  const siteOrder = () => pathGet(location.pathname, 'order') || 'trend';
+  // 칩에서 고른 조건은 바로 열지 않고 list.staged(고른 조건을 반영한 주소)에 모아 두었다가 '적용'에서 한 번에 연다
+  const curPath = () => list.staged || location.pathname;
+  const siteOrder = () => pathGet(curPath(), 'order') || 'trend';
   // 할인율 사이트 필터: discount_rates%5B0%5D/c8(30%↑)·c9(50%↑)·c10(80%↑) (2026-10-31 사이트 필터 창에서 확인, 서버가 거름. c7은 1~29%)
   const RATE_CODE = { 30: 'c8', 50: 'c9', 80: 'c10' };
-  const urlRate = () => { const c = pathGet(location.pathname, 'discount_rates'); return Number(Object.keys(RATE_CODE).find((k) => RATE_CODE[k] === c)) || 0; };
-  const urlSale = () => pathGet(location.pathname, 'campaign') === 'campaign' || pathGet(location.pathname, 'discount_rates') !== undefined;
+  const urlRate = () => { const c = pathGet(curPath(), 'discount_rates'); return Number(Object.keys(RATE_CODE).find((k) => RATE_CODE[k] === c)) || 0; };
+  const urlSale = () => pathGet(curPath(), 'campaign') === 'campaign' || pathGet(curPath(), 'discount_rates') !== undefined;
   // 작품 언어: 검색 주소 options[n]/<값>(2026-10-30 사이트 필터에서 확인). 여러 개 넣으면 OR(일본어 33025 + 한국어 4239 → 37166)
   const LANGS = [['KO_KR', '한국어', '한'], ['JPN', '일본어', '일'], ['CHI_HANS', '중국어 간체', '간'], ['CHI_HANT', '중국어 번체', '번']];
   // 사이트 필터의 언어 값 전부(그 밖의 options[]는 그대로 둔다). NM = 언어 불필요(그림만 있는 작품 등), 언어를 고르면 같이 넣는다
@@ -1023,7 +1086,8 @@
       list.watch(box, card);
       list.queuePlace(box, card);
       list.row(card, x, coupon.badges(x.id) || []);
-      const sig = [x.vas.join('/') + (x.more ? '+' : ''), x.id].join('|');
+      list.saleTag(card);
+      const sig =[x.vas.join('/') + (x.more ? '+' : ''), x.id].join('|');
       if (box.dataset.sig === sig) return;
       box.dataset.sig = sig;
       const cv = x.vas.length ? list.copier(el('span', { class: 'dlva', title: x.vas.join(' / ') }, 'CV ' + x.vas[0] + (x.vas.length > 1 ? ' +' + (x.vas.length - 1) : x.more ? ' +' : '')), x.vas[0]) : null;
@@ -1034,6 +1098,14 @@
       const copy = (ev) => { ev.preventDefault(); ev.stopPropagation(); copyText(node, text); };
       for (const t of ['click', 'contextmenu']) node.addEventListener(t, copy);
       return node;
+    },
+    // 할인율을 가격 옆 작은 딱지로(0.42.0, 폰 카드). 원화 화면은 사이트가 가격 옆(.overseas_discount_label)에 넣고, 엔화 화면은 아래 빨간 띠(.n_sale_state)에만 있어
+    // 그 글자를 가격 옆에 복사한다. 띠·サンプル/カート 버튼 줄은 CSS로 숨김(작품 화면에 들어가면 그대로 있음)
+    saleTag(card) {
+      const pw = card.querySelector('.n_work_price_wrap');
+      if (!pw || pw.querySelector('.icon_campaign, .dlsl')) return;
+      const s = card.querySelector('.n_sale_state .icon_campaign');
+      if (s && s.textContent.trim()) pw.append(el('span', { class: 'dlsl' }, s.textContent.trim()));
     },
     // 사진 아래 한 줄(정리안3): 품번(누르면 복사) · 쿠폰·묶음 · ♥(로그인일 때). 사진 칸(dt 등) 바로 뒤에 넣는다
     row(card, x, bs) {
@@ -1104,25 +1176,61 @@
       setText('dlh-va', `성우: 찾음 ${v.ok} · 없음 ${v.none} · 실패 ${v.err}${v.why ? ' (' + v.why + ')' : ''}`);
     },
 
+    // 아래 '필터 N' / '적용' 버튼(#dlfb, 패널이 만듦)과 바의 '초기화'를 지금 칩 상태에 맞춘다
+    syncFab() {
+      const bar = document.getElementById('dlbar');
+      const n = bar ? bar.querySelectorAll('.c.on').length : 0;
+      const rs = bar && bar.querySelector('.rs');
+      if (rs) rs.hidden = !(n || list.staged);
+      const fb = document.getElementById('dlfb');
+      if (!fb) return;
+      const ap = !!list.staged;
+      fb.hidden = !bar; // 목록 화면이면 늘 보인다(0.42.0: 우리 필터 창을 연다)
+      fb.classList.toggle('ap', ap);
+      fb.replaceChildren(icon(ap ? 'ck' : 'fl'), el('span', {}, ap ? '적용' : '필터'), ...(n ? [el('b', {}, String(n))] : []));
+    },
+
     mount() {
       if (!route.isList(location.pathname)) return;
       if (!document.getElementById('dlbar')) {
         const items = list.items();
         if (!items.length) return;
         const S = list.state;
-        const toggle = (b, on) => { b.classList.toggle('on', !!on); b.setAttribute('aria-pressed', String(!!on)); };
-        const chip = (label) => { const b = el('button', { class: 'c', 'aria-haspopup': 'dialog' }); b.dataset.k = label; return b; };
-        const label = (b, text) => b.replaceChildren(el('span', {}, text), icon('dn'));
-        // 칩 누르기: 바꾼 게 있으면 짧게 = 기본으로, 기본 상태면 짧게 = 팝업. 꾹 = 언제나 팝업(2026-11-01 사용자 결정)
-        const tapHold = (b, isOn, reset, open) => pressable(b, () => (isOn() ? reset() : open()), open, null, FAB_LONG_MS);
-        const go = (np) => { if (np && np !== location.pathname) { const u = new URL(location.href); u.pathname = np; location.assign(u.href); return true; } return false; };
+        // 켜진 칩에는 오른쪽에 ✕(끄기)가 붙는다. 칩 몸통은 항상 팝업 열기, ✕는 끄기 — 서로 떼어 실수로 안 켜고 끄게(0.41.0)
+        const toggle = (b, on) => {
+          b.classList.toggle('on', !!on); b.setAttribute('aria-pressed', String(!!on));
+          // 꺼진 칩은 글자 뒤에 ▾(누르면 고르는 창), 켜진 칩은 ✕(기본으로) — 0.42.0 시안
+          const dn = b.querySelector('svg.dn');
+          if (on && dn) dn.remove();
+          else if (!on && !dn) { const s = icon('dn'); s.setAttribute('class', 'dn'); b.append(s); }
+          if (b.wrap) {
+            b.wrap.classList.toggle('on', !!on);
+            const x = b.wrap.querySelector('.x');
+            if (on && !x) b.wrap.append(el('button', { class: 'x', 'aria-label': '끄기', onclick: () => b.reset && b.reset() }, '✕'));
+            else if (!on && x) x.remove();
+          }
+          list.syncFab();
+        };
+        const chip = (label) => { const b = el('button', { class: 'c', 'aria-haspopup': 'dialog' }); b.dataset.k = label; b.wrap = el('span', { class: 'cg' }, b); return b; };
+        const label = (b, text) => b.replaceChildren(el('span', {}, text));
+        // 칩 누르기(0.41.0, 사용자 결정): 칩 = 언제나 팝업 열기, 켜진 칩의 ✕ = 기본으로(끄기). isOn은 안 쓴다(예전 시그니처 유지)
+        const tapHold = (b, isOn, reset, open) => { b.reset = reset; b.addEventListener('click', open); };
+        // 바로 열지 않고 모아 둔다: 고른 조건을 반영한 주소를 list.staged에 두고 바를 다시 그린다('적용'에서 한 번에 연다)
         const remount = () => { document.getElementById('dlbar')?.remove(); list.mount(); };
+        const stage = (np) => {
+          const next = np && np !== location.pathname ? np : null;
+          if (next === (list.staged || null)) return false;
+          list.staged = next;
+          remount();
+          return true;
+        };
+        const go = (np) => { if (np && np !== location.pathname) { const u = new URL(location.href); u.pathname = np; location.assign(u.href); return true; } return false; };
         // 기본 언어: 한국어 기본(koDefault)이 붙는 검색이면 한국어, 아니면(서클·이름·쿠폰 검색) 조건 없음
         const langDef = () => { const p = location.pathname; return opt('koDefault') && isSearch && /^\/girls(-touch)?\/fsr\//.test(p) && !COUPON_RE.test(p) && !NAME_SEARCH.test(p) ? ['KO_KR'] : []; };
         const isSearch = route.isSearch(location.pathname);
-        // 주소의 order를 바꿔 다시 연다(사이트에서 정렬을 누를 때처럼 1번). 기본(인기순)은 order를 뺀다
-        const goPath = (drop, add) => { const u = new URL(location.href); u.pathname = pathSet(u.pathname, drop, add); location.assign(u.href); };
-        const goOrder = (v) => goPath(['order', 'page'], v === 'trend' ? [] : [['order', v]]);
+        // 주소의 order를 바꿔 다시 연다(사이트에서 정렬을 누를 때처럼 1번). 기본이 신작순이라 인기순도 order/trend로 적는다(빼면 시작할 때 신작순이 다시 붙음)
+        const goPath = (drop, add) => stage(pathSet(curPath(), drop, add));
+        const goOrder = (v) => goPath(['order', 'page'], [['order', v]]);
         // 검색 목록은 할인중·할인율도 사이트 필터(주소)로 건다. 할인율이 있으면 campaign/campaign은 뺀다(사이트에서 같은 라디오 한 묶음)
         // 할인율을 끄면 기본(saleOnly면 할인중)으로. '할인중'을 끄면 할인 조건이 없는 주소(= 할인 아닌 작품도)로 가고, 기본 할인중도 그 검색엔 다시 붙이지 않는다
         // (전엔 할인중을 다시 붙여 같은 페이지를 또 받았음). 할인 검색에만 있는 정렬(cend·cstart_d)도 뺀다
@@ -1130,33 +1238,32 @@
           const camp = [['campaign', 'campaign']];
           if (!off) { goPath(['discount_rates', 'campaign', 'page'], v ? [['discount_rates%5B0%5D', RATE_CODE[v]]] : camp); return; }
           if (v) { goPath(['discount_rates', 'campaign', 'page'], opt('saleOnly') ? camp : []); return; }
-          const np = pathSet(location.pathname, ['discount_rates', 'campaign', 'page', ...(/^c/.test(siteOrder()) ? ['order'] : [])], []);
+          const np = pathSet(curPath(), ['discount_rates', 'campaign', 'page', ...(/^c/.test(siteOrder()) ? ['order'] : [])], []);
           userOff.mark(np, 'sale');
-          const u = new URL(location.href); u.pathname = np; location.assign(u.href);
+          stage(np);
         };
-        // 할인: 위 칸은 이 쪽 안에서 거르기(할인중·30/50/70%↑), 아래 칸은 사이트 정렬(검색 주소에서만). 고른 것을 다시 누르면 꺼져 기본으로
+        // 할인: 할인율(검색은 사이트 필터라 '적용'에서 한 번에 열고, 아닌 화면은 이 쪽 안에서 바로 거름). 고른 것을 다시 누르면 꺼져 기본으로. 정렬은 정렬 칩
         const saleChip = () => {
           const b = chip('sale');
           const paint = () => {
             if (isSearch) { S.sale = urlSale(); S.rate = urlRate(); } // 사이트에서 직접 바꿔도 주소를 읽어 맞춘다
-            const so = isSearch ? (SALE_SORTS.find((x) => x[0] === siteOrder()) || [])[2] : '';
             const base = S.rate ? `${S.rate}%↑` : S.sale ? '할인중' : '';
-            label(b, [base, so].filter(Boolean).join('·') || '할인');
-            toggle(b, S.sale || S.rate || so);
+            label(b, base || '할인');
+            toggle(b, S.sale || S.rate);
           };
           const save = () => { store.set('sb.sale', S.sale); store.set('sb.rate', S.rate); paint(); list.apply(); };
-          const open = () => { paint(); sheet.openSale(b, isSearch, (v) => {
+          const open = () => { paint(); sheet.openSale(b, (v) => {
             const cur = S.sale || S.rate ? S.rate : -1;
-            if (isSearch) { goRate(v, cur === v); return; }
+            if (isSearch) { sheet.close(); goRate(v, cur === v); return; }
             if (cur === v) { S.sale = false; S.rate = 0; } else { S.sale = true; S.rate = v; }
             save();
-          }, (v) => { const cur = siteOrder(); goOrder(v === cur ? 'trend' : v); }); };
-          // 기본으로: 할인 조건·정렬을 한 번에 뺀다(검색은 주소 1번 이동). 기본 할인중(saleOnly)도 이 검색엔 다시 안 붙임
+          }); };
+          // 기본으로: 할인 조건을 뺀다(검색은 모아 둠). 할인 검색에만 있는 정렬(개시순 등)도 같이 뺀다. 기본 할인중(saleOnly)도 이 검색엔 다시 안 붙임
           const reset = () => {
             if (!isSearch) { S.sale = false; S.rate = 0; save(); return; }
-            const np = pathSet(location.pathname, ['discount_rates', 'campaign', 'order', 'page'], []);
+            const np = pathSet(curPath(), ['discount_rates', 'campaign', 'page', ...(/^c/.test(siteOrder()) ? ['order'] : [])], []);
             if (opt('saleOnly')) userOff.mark(np, 'sale');
-            const u = new URL(location.href); u.pathname = np; location.assign(u.href);
+            stage(np);
           };
           tapHold(b, () => { paint(); return b.classList.contains('on'); }, reset, open);
           paint();
@@ -1185,8 +1292,8 @@
         // 작품 언어(검색·서클 목록): 여러 개 고르고, 팝업을 닫을 때 바뀌었으면 주소를 바꿔 연다(사이트에서 필터를 누를 때처럼 1번)
         const langChip = () => {
           const b = chip('lang');
-          const cur = langNow(location.pathname);
-          const all = isCircle(location.pathname) && cur.length === LANGS.length; // 서클에서 네 언어 다 = 전체(꺼진 것으로 보임)
+          const cur = langNow(curPath());
+          const all = isCircle(curPath()) && cur.length === LANGS.length; // 서클에서 네 언어 다 = 전체(꺼진 것으로 보임)
           const on = all ? [] : LANGS.filter((x) => cur.includes(x[0]));
           label(b, on.length ? on.map((x) => x[2]).join('·') : '언어');
           b.setAttribute('aria-label', '작품 언어: ' + (on.length ? on.map((x) => x[1]).join(', ') : '전체'));
@@ -1194,32 +1301,32 @@
           const isDef = on.map((x) => x[0]).join() === def.join();
           toggle(b, !isDef); // 기본과 다를 때만 파란색
           const go = (v) => {
-            const np = langPath(location.pathname, v);
-            if (!np || np === location.pathname) return;
+            const np = langPath(curPath(), v);
+            if (!np) return;
             if (!v.length) userOff.mark(np, 'lang'); // 다 끄면 '언어 조건 없음' 그대로(한국어 기본을 다시 붙이지 않음)
-            const u = new URL(location.href); u.pathname = np; location.assign(u.href);
+            stage(np);
           };
           tapHold(b, () => !isDef, () => go(def), () => sheet.openLang(b, cur, go));
           return b;
         };
-        // 층(검색만): 대상 TL(female)·BL(gay) × 형식 동인·코믹·드라마(주소 sex_category[]·work_category[], 여러 개 = 또는). 닫을 때 바뀌었으면 한 번 이동
+        // 층(검색만): 대상 TL·BL × 형식 망가·ASMR·보이스(FORMS, 주소 work_category[]·work_type_category[]의 조합). 닫을 때 바뀌었으면 한 번 이동
+        // 기본(DEF_FLOOR = TL + ASMR·보이스, 이름 검색·쿠폰 대상은 조건 없음)과 같으면 회색. ✕ = 기본으로. 팝업에서 다 끄면 그 검색엔 기본을 다시 안 붙임(userOff floor)
         const floorChip = () => {
           const b = chip('floor');
-          const pp = pathPairs(location.pathname);
-          const cur = Object.fromEntries(FLOORS.map(([k]) => [k, pp ? pp.pairs.filter((x) => segKey(x[0]) === k).map((x) => x[1]) : []]));
-          const names = FLOORS.map(([k, vs]) => cur[k].map((v) => (vs.find((x) => x[0] === v) || [v, v])[1]));
-          const n = names[0].length + names[1].length, head = [names[0][0], names[1][0]].filter(Boolean);
-          label(b, n ? head.join(' ') + (n > head.length ? '+' + (n - head.length) : '') : '층');
-          toggle(b, n);
-          const pick = (sel) => go(pathSet(location.pathname, ['sex_category', 'work_category', 'page'], FLOORS.flatMap(([k]) => sel[k].map((v, i) => [`${k}%5B${i}%5D`, v]))));
-          tapHold(b, () => n > 0, () => pick({ sex_category: [], work_category: [] }), () => sheet.openFloor(b, cur, pick));
-          return b;
-        };
-        // 필터: 사이트 '필터링 조건' 창을 연다(있는 화면만)
-        const filterChip = () => {
-          const b = chip('filter');
-          b.replaceChildren(el('span', {}, '필터'));
-          b.addEventListener('click', () => { const a = document.querySelector('a.search_sort'); if (a) a.click(); });
+          const cur = floorRead(curPath());
+          const names = [...SEXES.filter((x) => cur.sex.includes(x[0])).map((x) => x[1]), ...FORMS.filter((f) => cur.forms.includes(f[0])).map((f) => f[1])];
+          const n = names.length;
+          const defOk = floorDefOk(curPath());
+          const def = defOk ? DEF_FLOOR : { sex: [], forms: [] };
+          const isDef = cur.sex.join() === def.sex.join() && cur.forms.join() === def.forms.join();
+          label(b, !n ? '대상' : n <= 2 ? names.join('·') : names[0] + '+' + (n - 1)); // 칸이 좁아 셋부터는 첫 항목 + 나머지 개수(전부는 팝업에서)
+          toggle(b, !isDef);
+          const pick = (sel) => {
+            const np = pathSet(curPath(), [...FLOOR_KEYS, 'work_type_name', 'page'], floorPairs(sel));
+            if (defOk && !sel.sex.length && !sel.forms.length) userOff.mark(np, 'floor');
+            stage(np);
+          };
+          tapHold(b, () => !isDef, () => pick(def), () => sheet.openFloor(b, cur, pick));
           return b;
         };
         // 검색(묶음 할인 화면만, 사이트 검색창이 없음): 주소 ?keyword=·?genre[n]=을 사이트가 거른다(2026-11-01: 247368 → keyword=純愛 9978건). 짧게 = 조건 있으면 빼기
@@ -1236,40 +1343,96 @@
           tapHold(b, () => !!t, clear, () => sheet.openBulk(b, k.split('|')[0]));
           return b;
         };
-        const make = { floor: isSearch && floorChip, lang: LANG_PAGE.test(location.pathname) && langChip, sale: saleChip, coupon: couponChip, filter: document.querySelector('a.search_sort') && filterChip, search: BULK_PAGE.test(location.pathname) && bulkChip };
-        const hidden = chipHidden();
-        const chips = chipOrder().filter((k) => make[k] && !hidden.includes(k)).map((k) => make[k]());
+        // 정렬(검색만, 사이트 주소의 order): 한 개 고름. 고른 것을 다시 누르면 기본(신작순). 할인 개시순은 할인 검색일 때만 목록에 나온다
+        const sortChip = () => {
+          const b = chip('sort');
+          const cur = siteOrder();
+          const name = (SORTS.find((x) => x[0] === cur) || [])[2];
+          const def = COUPON_RE.test(curPath()) ? 'trend' : DEF_ORDER; // 쿠폰 대상 검색은 정렬 기본을 안 붙임(사이트 기본 인기순)
+          label(b, name || '정렬');
+          toggle(b, cur !== def);
+          const pick = (v) => goOrder(v === cur ? def : v);
+          tapHold(b, () => cur !== def, () => goOrder(def), () => sheet.openSort(b, cur, urlSale(), pick));
+          return b;
+        };
+        // 이 화면에서 못 쓰는 칩은 빼지 않고 흐리게 자리만 둔다(0.42.2: 화면마다 칩 줄이 같은 모양)
+        const offChip = (name) => () => { const b = chip(name); b.disabled = true; label(b, ({ floor: '대상', lang: '언어', sort: '정렬' })[name]); return b; };
+        const make = { floor: isSearch ? floorChip : offChip('floor'), lang: LANG_PAGE.test(location.pathname) ? langChip : offChip('lang'), sale: saleChip, sort: isSearch ? sortChip : offChip('sort'), coupon: couponChip, search: BULK_PAGE.test(location.pathname) && bulkChip };
+        const chips = chipOrder().filter((k) => make[k]).map((k) => make[k]());
+        const staged = !!list.staged;
         // ↺: 바꾼 칩이 있을 때만 맨 앞에. 누르면 전부 기본으로(검색은 주소 1번 이동)
         const isOn = (k) => chips.some((c) => c.dataset.k === k && c.classList.contains('on'));
         const resetAll = () => {
           if (S.coupon) { S.coupon = ''; store.set('sb.coupon', ''); }
-          let np = location.pathname;
-          if (isSearch) np = pathSet(np, ['discount_rates', 'campaign', 'order', 'page', 'sex_category', 'work_category'], []);
+          let np = curPath();
+          list.staged = null;
+          if (isSearch) np = pathSet(np, ['discount_rates', 'campaign', 'order', 'page', ...FLOOR_KEYS, 'work_type_name'], [...(COUPON_RE.test(np) ? [] : [['order', DEF_ORDER]]), ...(floorDefOk(np) ? floorDefPairs() : [])]);
           else if (isOn('sale')) { S.sale = false; S.rate = 0; store.set('sb.sale', false); store.set('sb.rate', 0); }
           if (isOn('lang')) np = langPath(np, langDef()) || np;
           if (opt('saleOnly')) userOff.mark(np, 'sale');
           if (!langDef().length && isOn('lang')) userOff.mark(np, 'lang');
           if (!go(np)) remount();
         };
-        const rs = el('button', { class: 'c rs', 'aria-label': '전부 기본으로', onclick: resetAll }, '↺');
-        rs.hidden = !chips.some((c) => c.classList.contains('on'));
+        const rs = el('button', { class: 'rs', 'aria-label': '전부 기본으로', onclick: resetAll }, '초기화');
+        rs.hidden = !(staged || chips.some((c) => c.classList.contains('on')));
+        // 적용: 칩에서 고른 조건(list.staged)을 한 번에 연다(주소 1번 이동). 고르기만 하고 안 누르면 아무것도 안 바뀐다. 버튼은 아래 알약 옆 '필터' 자리에 뜬다(list.syncFab)
+        list.onApply = () => { const np = list.staged; list.staged = null; if (!go(np)) remount(); };
+        // 우리 필터 창(0.42.0, panel이 그림): 지금 조건(cur)·기본(def)·검색하기(run). 검색 화면은 주소를 한 번에 바꿔 1번 이동, 아닌 목록은 할인만 이 쪽 안에서 거른다
+        list.filterSpec = () => {
+          if (!isSearch) return { search: false, cur: { sale: !!S.sale, rate: S.rate || 0 }, def: { sale: false, rate: 0 }, run: (v) => { S.sale = v.sale; S.rate = v.rate; store.set('sb.sale', v.sale); store.set('sb.rate', v.rate); remount(); } };
+          const p = curPath(), fl = floorRead(p), defOk = floorDefOk(p), pp = pathPairs(p);
+          const cur = { sex: fl.sex, forms: fl.forms, genres: pp ? pp.pairs.filter((x) => segKey(x[0]) === 'genre').map((x) => x[1]) : [], sale: urlSale(), rate: urlRate(), lang: langNow(p) };
+          const def = { sex: defOk ? DEF_FLOOR.sex : [], forms: defOk ? DEF_FLOOR.forms : [], genres: [], sale: !!opt('saleOnly') && !COUPON_RE.test(p) && !NAME_SEARCH.test(p), rate: 0, lang: langDef() };
+          const save = document.querySelector('a.search_save');
+          return { search: true, cur, def, canSave: !!save, save: () => save.click(), run: (v) => {
+            const off = !v.sale && !v.rate;
+            let np = pathSet(p, [...FLOOR_KEYS, 'work_type_name', 'genre', 'discount_rates', 'campaign', 'page', ...(off && /^c/.test(siteOrder()) ? ['order'] : [])],
+              [...floorPairs(v), ...v.genres.map((n, i) => [`genre%5B${i}%5D`, n]), ...(v.rate ? [['discount_rates%5B0%5D', RATE_CODE[v.rate]]] : v.sale ? [['campaign', 'campaign']] : [])]);
+            np = langPath(np, v.lang) || np;
+            if (defOk && !v.sex.length && !v.forms.length) userOff.mark(np, 'floor'); // 다 끈 기본값은 그 검색에 다시 붙이지 않는다
+            if (!v.lang.length && langDef().length) userOff.mark(np, 'lang');
+            if (off && opt('saleOnly')) userOff.mark(np, 'sale');
+            list.staged = null;
+            if (!go(np)) remount();
+          } };
+        };
         const bar = el('div', { id: 'dlbar', role: 'toolbar', 'aria-label': '목록 거르기' },
-          rs, ...chips, el('span', { class: 'cnt', role: 'status', 'aria-live': 'polite' }));
+          el('div', { class: 'cr' }, ...chips.map((b) => b.wrap)),
+          el('div', { class: 'ir' }, el('span', { class: 'cnt', role: 'status', 'aria-live': 'polite' }), rs));
         let ref = items[0].parentElement;
         while (ref.parentElement && ref.parentElement !== document.body && /flex|grid/.test(getComputedStyle(ref.parentElement).display)) ref = ref.parentElement;
         ref.parentElement.insertBefore(bar, ref);
-        if (list.state.coupon) coupon.refreshHeld().then((did) => did && list.apply());
+        list.syncFab();
+        if (list.state.coupon)coupon.refreshHeld().then((did) => did && list.apply());
       }
       fav.refresh();
       list.apply();
     },
   };
-  // 칩 순서·숨김(설정 '칩'). 모르는 값은 버리고 빠진 칩은 뒤에 붙인다
-  const CHIPS = [['search', '검색(묶음 할인)'], ['floor', '층'], ['lang', '언어'], ['sale', '할인'], ['coupon', '쿠폰'], ['filter', '필터']];
+  // 칩 순서는 고정(0.41.0: 순서·보이기 설정을 없앰). 묶음 할인 화면에서만 맨 앞에 검색 칩
+  const CHIPS = [['search', '검색(묶음 할인)'], ['floor', '대상'], ['lang', '언어'], ['sale', '할인'], ['coupon', '쿠폰'], ['sort', '정렬']];
   const BULK_PAGE = /^\/[^/]+\/campaign\/bulkbuy\/=\/key\//;
-  const FLOORS = [['sex_category', [['female', 'TL'], ['gay', 'BL']]], ['work_category', [['doujin', '동인'], ['books', '코믹'], ['drama', '드라마']]]];
-  const chipOrder = () => { const v = store.get('chips.order', []); const all = CHIPS.map((x) => x[0]); const o = (Array.isArray(v) ? v : []).filter((k) => all.includes(k)); return [...new Set([...o, ...all])]; };
-  const chipHidden = () => { const v = store.get('chips.hidden', []); return Array.isArray(v) ? v : []; };
+  // 대상(sex_category) × 형식 3칸(0.41.3 사용자 결정). 형식은 층(work_category)과 작품 분류(work_type_category)의 조합. 키끼리는 '그리고', 값끼리는 '또는'이라
+  // 둘 이상 고르면 층×분류 전부가 된다: 망가+ASMR·ASMR+보이스·셋 다는 정확, 망가+보이스만 동인 ASMR이 섞인다(코믹·드라마의 다른 분류는 0건).
+  // 2026-11-02 TL 개수: 동인 audio 24583 · 드라마 audio 2843(드라마 전체 2851) · 코믹 comic 97264 · 동인 comic 15882 · 코믹 SOU 0. 층을 안 넣으면 사이트는 동인만 찾는다(TL 전체 50792 < 코믹 106315)
+  const SEXES = [['female', 'TL'], ['gay', 'BL']];
+  const FORMS = [['manga', '망가', ['books', 'doujin'], ['comic']], ['asmr', 'ASMR', ['doujin'], ['audio']], ['voice', '보이스', ['drama'], ['audio']]];
+  const FLOOR_KEYS = ['sex_category', 'work_category', 'work_type', 'work_type_category'];
+  // 주소 → {sex, forms}. 층이 없으면 사이트처럼 동인으로 본다. 예전 기본(work_type/SOU)은 audio로 읽는다. work_category/all(이름 검색 주소) = 조건 없음
+  function floorRead(p) {
+    const pp = pathPairs(p), vals = (k) => (pp ? pp.pairs.filter((x) => segKey(x[0]) === k && x[1] !== 'all').map((x) => x[1]) : []);
+    const cats = vals('work_category'), wtc = [...vals('work_type_category'), ...(vals('work_type').includes('SOU') ? ['audio'] : [])];
+    const cs = cats.length ? cats : ['doujin'];
+    return { sex: SEXES.map((x) => x[0]).filter((v) => vals('sex_category').includes(v)), forms: wtc.length ? FORMS.filter((f) => f[2].every((c) => cs.includes(c)) && f[3].every((t) => wtc.includes(t))).map((f) => f[0]) : [] };
+  }
+  // {sex, forms} → 주소 조각(값마다 [n])
+  function floorPairs(sel) {
+    const fs = FORMS.filter((f) => sel.forms.includes(f[0]));
+    const uniq = (xs) => [...new Set(xs)];
+    const seg = (k, vs) => vs.map((v, i) => [`${k}%5B${i}%5D`, v]);
+    return [...seg('sex_category', sel.sex), ...seg('work_category', uniq(fs.flatMap((f) => f[2]))), ...seg('work_type_category', uniq(fs.flatMap((f) => f[3])))];
+  }
+  const chipOrder = () => CHIPS.map((x) => x[0]);
 
   /* ========== 7.2 coupon: 쿠폰 적용 대상 ========== */
   const COUPON_TTL = 6 * 3600 * 1000;
@@ -1683,7 +1846,7 @@
   /* ========== 7.7 sbox: 사이트 검색창 아래 목록(정리안3) ==========
      빈 검색창을 누르면 저장한 검색(사이트 마이페이지, 열 때만·1시간에 1번) · 자주 쓰는 태그(☆) · 최근 검색.
      글자를 치면 태그 후보(한국어·일본어 이름, 목록은 kw가 받은 것) → 누르면 태그 번호로 검색(언어와 상관없이 같은 결과). 맨 아래는 그 글자로 검색. */
-  const SAVED_TTL = 3600 * 1000;
+  const SAVED_TTL = 5 * 60 * 1000; // 사이트에서 저장한 검색을 바꾸면 5분 안에 보이게(전엔 1시간)
   const saved = {
     list() { const c = store.get('saved1', null); return c && Array.isArray(c.list) ? c.list : []; },
     refresh() {
@@ -1717,23 +1880,55 @@
       return kw.list().map((x) => [Math.min(sc(x[1]), sc(x[2])), x]).filter(([n]) => n < 9).sort((a, b) => a[0] - b[0]).slice(0, 8).map(([, x]) => x);
     },
     // 태그 번호로 검색: 검색 화면이면 지금 조건에 더하고(태그끼리는 '그리고') 검색어는 뺀다, 아니면 새 검색
-    go(n) {
+    go(n) { tags.goAll([n]); },
+    // 태그 이름으로 글자 검색: 한국어·일본어 이름('/'로 나눈 조각 각각)을 '|'(또는)로 묶어 검색창에 넣고 제출한다(오빠/형 → 오빠|형|兄)
+    words(n) {
+      const t = kw.list().find((x) => x[0] === n);
+      return t ? [...new Set([t[1], t[2]].flatMap((x) => x.split('/')).map((x) => x.trim()).filter(Boolean))].join('|') : '';
+    },
+    word(inp, n) {
+      const w = tags.words(n);
+      if (!w || !inp) return;
+      sbox.remember(w.split('|')[0]);
+      inp.value = w;
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      sbox.submit(inp);
+    },
+    // 여러 태그를 한 번에(# 검색). 이미 걸린 태그는 건너뛴다
+    goAll(ns) {
       const p = location.pathname, pp = route.isSearch(p) && pathPairs(p);
       if (BULK_PAGE.test(p)) {
         const u = new URL(location.href);
         const gs = [...u.searchParams.keys()].filter((x) => /^genre\[\d*\]$/.test(x));
-        if (gs.some((x) => u.searchParams.get(x) === n)) return;
+        const add = ns.filter((n) => !gs.some((x) => u.searchParams.get(x) === n));
+        if (!add.length) return;
         u.searchParams.delete('page');
-        u.searchParams.set(`genre[${gs.length}]`, n);
+        add.forEach((n, i) => u.searchParams.set(`genre[${gs.length + i}]`, n));
         location.assign(u.href);
         return;
       }
       if (pp) {
         const gs = pp.pairs.filter((x) => segKey(x[0]) === 'genre');
-        if (gs.some((x) => x[1] === n)) return;
-        const np = pathSet(p, ['keyword', 'page'], [[`genre%5B${gs.length}%5D`, n]]);
+        const add = ns.filter((n) => !gs.some((x) => x[1] === n));
+        if (!add.length) return;
+        const np = pathSet(p, ['keyword', 'page'], add.map((n, i) => [`genre%5B${gs.length + i}%5D`, n]));
         const u = new URL(location.href); u.pathname = np; location.assign(u.href);
-      } else location.assign(`https://www.dlsite.com/${location.pathname.split('/')[1] || 'girls'}/fsr/=/language/jp/genre%5B0%5D/${n}`);
+      } else location.assign(`https://www.dlsite.com/${location.pathname.split('/')[1] || 'girls'}/fsr/=/language/jp/` + ns.map((n, i) => `genre%5B${i}%5D/${n}`).join('/'));
+    },
+    // '#임신,순애' → 앞의 # 를 떼고 쉼표로 나눈 조각들. 조각이 태그 이름(한국어·일본어, '/'로 나눈 한 조각도, 띄어쓰기 무시)과 정확히 같으면 번호, 아니면 null
+    pieces(v) { return /^#/.test(v) ? v.replace(/^#/, '').split(',').map((x) => x.replace(/^\s*#?/, '').trim()) : []; },
+    resolve(piece) {
+      const w = normName(piece);
+      if (!w) return null;
+      const hit = kw.list().find(([, ko, ja]) => [ko, ja].some((t) => normName(t) === w || t.split('/').some((x) => normName(x) === w)));
+      return hit ? hit[0] : null;
+    },
+    // 검색창 글자가 모두 태그면 번호 목록, 아니면 null
+    parse(v) {
+      const ps = tags.pieces(v.trim());
+      if (!ps.length) return null;
+      const ns = ps.map(tags.resolve);
+      return ns.every(Boolean) ? [...new Set(ns)] : null;
     },
   };
   const sbox = {
@@ -1765,14 +1960,18 @@
         const out = [];
         const sv = saved.list(), ft = tags.favs(), rc = sbox.recent();
         if (sv.length) out.push(sheet.sec('저장한 검색'), chips(sv.map(([t, u]) => el('a', { class: 'chip sv', href: u }, t))));
-        if (ft.length) out.push(sheet.sec('자주 쓰는 태그'), chips(ft.map(([n, ko]) => el('button', { class: 'chip', onclick: () => { sheet.close(); tags.go(n); } }, '#' + ko))));
+        if (ft.length) out.push(sheet.sec('자주 쓰는 태그'), chips(ft.map(([n, ko]) => el('button', { class: 'chip', onclick: () => { sheet.close(); tags.word(inp, n); } }, ko))));
         if (rc.length) out.push(sheet.sec('최근'), chips(rc.map((t) => el('button', { class: 'chip', onclick: () => { inp.value = t; sheet.close(); sbox.submit(inp); } }, t))));
         return out;
       }
       const fs = tags.favIds();
-      const rows = tags.find(v).map(([n, ko, ja]) => {
+      // '#임신,순' 처럼 #로 시작하면 마지막 쉼표 뒤 글자로 후보를 찾고, 앞 조각이 태그면 같이 건다(태그 번호 검색 = 태그 붙은 작품만).
+      // # 없이 후보를 누르면 태그 이름(한국어·일본어)으로 글자 검색 = 제목·본문·태그 모두(태그 129번 2483 / 임신|妊娠|孕ませ 4986, 2026-11-02)
+      const ps = tags.pieces(v), prev = ps.slice(0, -1).map(tags.resolve).filter(Boolean);
+      const go = (n) => { if (ps.length) tags.goAll([...new Set([...prev, n])]); else tags.word(inp, n); };
+      const rows = tags.find(ps.length ? ps[ps.length - 1] : v).map(([n, ko, ja]) => {
         const st = el('button', { class: 'st' + (fs.includes(n) ? ' on' : ''), 'aria-label': '자주 쓰는 태그', 'aria-pressed': String(fs.includes(n)), onclick: (e) => { e.stopPropagation(); tags.toggleFav(n); sheet.redraw(sbox.parts(inp)); } }, fs.includes(n) ? '★' : '☆');
-        return el('div', { class: 'li tr' }, el('button', { class: 'tb', onclick: () => { sheet.close(); tags.go(n); } }, el('span', { class: 'pt' }, '#' + ko), ko !== ja ? el('span', { class: 'ps' }, ja) : null), st);
+        return el('div', { class: 'li tr' }, el('button', { class: 'tb', onclick: () => { sheet.close(); go(n); } }, el('span', { class: 'pt' }, (ps.length ? '#' : '') + ko), ko !== ja ? el('span', { class: 'ps' }, ja) : null), st);
       });
       return [...rows, el('button', { class: 'li all', onclick: () => { sheet.close(); sbox.submit(inp); } }, icon('sr'), el('span', { class: 'pt' }, `'${v}' 전체 검색`))];
     },
@@ -1834,20 +2033,22 @@
     redraw(parts) { sheet.node.replaceChildren(...parts.filter(Boolean)); sheet.fit(); },
     sec: (t) => el('div', { class: 'sec' }, t),
     opt(text, on, onclick) { return el('button', { class: 'op' + (on ? ' on' : ''), 'aria-pressed': String(!!on), onclick }, text); },
-    // 할인: 위 할인율(이 쪽 안에서 거르기), 아래 정렬(사이트, 검색 주소에서만). 할인율은 누르면 바로 적용하고 창은 열어 둔다
-    openSale(opener, withSort, pickRate, pickSort) {
+    // 할인율 하나. 검색 목록은 고르면 팝업이 닫히고(고른 조건은 '적용'에서 한 번에 열림), 아닌 화면은 바로 거르고 창은 열어 둔다
+    openSale(opener, pickRate) {
       const S = list.state;
       const draw = () => {
         const cur = S.sale || S.rate ? S.rate : -1;
-        const so = siteOrder();
         return [
           sheet.sec('할인율'),
-          el('div', { class: 'g4' }, ...RATE_STEPS.map((v) => sheet.opt(v ? `${v}%↑` : '할인중', cur === v, () => { pickRate(v); sheet.redraw(draw()); }))),
-          withSort ? sheet.sec('정렬') : null,
-          withSort ? el('div', { class: 'g2' }, ...SALE_SORTS.filter(([v]) => !/^c/.test(v) || S.sale).map(([v, t]) => sheet.opt(t, so === v, () => { sheet.close(); pickSort(v); }))) : null,
+          el('div', { class: 'g4' }, ...RATE_STEPS.map((v) => sheet.opt(v ? `${v}%↑` : '할인중', cur === v, () => { pickRate(v); if (!sheet.node.hidden) sheet.redraw(draw()); }))),
         ];
       };
       sheet.show(draw(), opener);
+    },
+    // 정렬 하나(세로 목록). 고르면 닫힌다
+    openSort(opener, cur, sale, pick) {
+      sheet.show([sheet.sec('정렬'), ...SORTS.filter(([v]) => v !== 'cstart_d' || sale).map(([v, t]) => el('button', { class: 'li' + (cur === v ? ' on' : ''), 'aria-pressed': String(cur === v), onclick: () => { sheet.close(); pick(v); } },
+        el('span', { class: 'pt' }, t), cur === v ? icon('ck') : null))], opener);
     },
     openCoupons(opener, pick) {
       const cur = list.state.coupon;
@@ -1866,22 +2067,26 @@
       }
       sheet.show(parts, opener);
     },
-    // 묶음 할인 검색: 입력칸 + 태그 후보. Enter = 그 글자로(한국어 태그 이름이면 일본어도 '또는'), 후보 = 태그 번호
+    // 묶음 할인 검색: 입력칸 + 태그 후보. Enter = 그 글자로(한국어면 일본어도 '또는'), 후보 = 태그 이름으로 글자 검색. '#'로 시작하면 태그 번호(검색창과 같은 규칙)
     openBulk(opener, q) {
       const inp = el('input', { type: 'search', class: 'tin', value: q, enterkeyhint: 'search', 'aria-label': '묶음 할인 안에서 검색' });
       const list = el('div', {});
-      const run = () => {
-        const v = inp.value.trim();
+      const run = (word) => {
+        const v = word || inp.value.trim();
+        const ns = !word && tags.parse(v);
+        if (ns) { sheet.close(); tags.goAll(ns); return; }
+        const ps = tags.pieces(v), w = ps.length ? ps.filter(Boolean).join(' ') : v;
         const u = new URL(location.href);
         u.searchParams.delete('page');
-        if (v) { sbox.remember(v); u.searchParams.set('keyword', kw.expand(v) || v); } else u.searchParams.delete('keyword');
+        if (w) { sbox.remember(w.split('|')[0]); u.searchParams.set('keyword', kw.expand(w) || w); } else u.searchParams.delete('keyword');
         sheet.close();
         location.assign(u.href);
       };
       const draw = () => {
-        const v = inp.value.trim();
-        list.replaceChildren(...(v ? tags.find(v) : tags.favs()).map(([n, ko, ja]) => el('button', { class: 'li', onclick: () => { sheet.close(); tags.go(n); } },
-          el('span', { class: 'pb' }, el('span', { class: 'pt' }, '#' + ko), ko !== ja ? el('span', { class: 'ps' }, ja) : null))));
+        const v = inp.value.trim(), ps = tags.pieces(v), prev = ps.slice(0, -1).map(tags.resolve).filter(Boolean);
+        const go = (n) => { if (ps.length) { sheet.close(); tags.goAll([...new Set([...prev, n])]); } else run(tags.words(n)); };
+        list.replaceChildren(...(v ? tags.find(ps.length ? ps[ps.length - 1] : v) : tags.favs()).map(([n, ko, ja]) => el('button', { class: 'li', onclick: () => go(n) },
+          el('span', { class: 'pb' }, el('span', { class: 'pt' }, (ps.length ? '#' : '') + ko), ko !== ja ? el('span', { class: 'ps' }, ja) : null))));
         sheet.fit();
       };
       inp.addEventListener('input', draw);
@@ -1889,14 +2094,16 @@
       sheet.show([el('label', { class: 'sin' }, icon('sr'), inp), list], opener, { focus: '.tin' });
       draw();
     },
-    // 층: 대상·형식 여러 개. 닫을 때 처음과 다르면 pick
+    // 층: 대상(TL·BL)·형식(망가·ASMR·보이스) 여러 개. 닫을 때 처음과 다르면 pick({sex, forms})
     openFloor(opener, cur, pick) {
-      const sel = { sex_category: [...cur.sex_category], work_category: [...cur.work_category] };
-      const draw = () => FLOORS.flatMap(([k, vs], i) => [sheet.sec(i ? '형식' : '대상'), el('div', { class: i ? 'g3' : 'g2' }, vs.map(([v, t]) => sheet.opt(t, sel[k].includes(v), () => {
-        sel[k] = sel[k].includes(v) ? sel[k].filter((x) => x !== v) : [...sel[k], v];
+      const sel = { sex: [...cur.sex], forms: [...cur.forms] };
+      const groups = [['대상', 'g2', 'sex', SEXES], ['형식', 'g3', 'forms', FORMS]];
+      const order = { sex: SEXES.map((x) => x[0]), forms: FORMS.map((x) => x[0]) };
+      const draw = () => groups.flatMap(([title, cls, k, opts]) => [sheet.sec(title), el('div', { class: cls }, opts.map(([v, t]) => sheet.opt(t, sel[k].includes(v), () => {
+        sel[k] = order[k].filter((x) => (x === v ? !sel[k].includes(v) : sel[k].includes(x)));
         sheet.redraw(draw());
       })))]);
-      sheet.show(draw(), opener, { onClose: () => { if (FLOORS.some(([k]) => sel[k].join() !== cur[k].join())) pick(sel); } });
+      sheet.show(draw(), opener, { onClose: () => { if (sel.sex.join() !== cur.sex.join() || sel.forms.join() !== cur.forms.join()) pick(sel); } });
     },
     // 언어: 여러 개. 닫을 때 처음과 다르면 pick(새 목록)
     openLang(opener, cur, pick) {
@@ -2293,32 +2500,42 @@
 #dlh button,#dlbar button,#dlsheet button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 #dlh :focus-visible,#dlbar :focus-visible,#dlsheet :focus-visible,.dlx :focus-visible,.dlw :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 
-#dlbar{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
-  position:relative;z-index:1;float:none;clear:both;flex:0 0 100%;grid-column:1/-1;width:auto;max-width:100%;margin:0;padding:6px 10px;
+#dlbar{display:block;position:relative;z-index:1;float:none;clear:both;flex:0 0 100%;grid-column:1/-1;width:auto;max-width:100%;margin:0;padding:6px 10px 2px;
   background:var(--bg);border-bottom:1px solid var(--line);font-size:13px;line-height:1.2;color:var(--ink)}
-#dlbar::-webkit-scrollbar{display:none}
-#dlbar>*{flex:none;margin:0}
-#dlbar .c{display:inline-flex;align-items:center;justify-content:center;gap:1px;height:34px;min-width:34px;padding:0 8px 0 12px;border:0;border-radius:8px;background:#eef0f3;color:#3c3f46;font-size:13.5px;font-weight:600;line-height:1;white-space:nowrap}
+#dlbar .cr{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#dlbar .cr::-webkit-scrollbar{display:none}
+#dlbar .cg{display:flex;flex:none;max-width:70%;height:38px;border-radius:10px;background:#eef0f3;color:#3c3f46}
+#dlbar .cg.on{background:#e3ebfc;color:#1a56db;box-shadow:inset 0 0 0 1px #b9cdf5}
+#dlbar .c{display:flex;align-items:center;justify-content:center;gap:2px;flex:1 1 auto;min-width:0;height:100%;padding:0 8px 0 12px;border:0;border-radius:10px;background:none;color:inherit;font-size:13.5px;font-weight:600;line-height:1;white-space:nowrap}
+#dlbar .c:disabled{color:#b5bbcb}
+#dlbar .c>span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
 #dlbar .c svg{flex:none;width:18px;height:18px;fill:currentColor}
-#dlbar .c.on{background:#e3ebfc;color:#1a56db;box-shadow:inset 0 0 0 1px #b9cdf5}
-#dlbar .c.rs{width:34px;padding:0;font-size:18px;font-weight:700}
-#dlbar .c[hidden]{display:none}
-#dlbar .cnt{margin-left:auto;font-size:12px;color:var(--faint);white-space:nowrap;padding:0 2px}
+#dlbar .c svg.dn{width:16px;height:16px;opacity:.7}
+#dlbar .cg.on .c{padding-right:2px}
+#dlbar .x{flex:none;width:26px;height:100%;padding:0;border:0;border-radius:0 10px 10px 0;background:none;color:#1a56db;font-size:13px}
+#dlbar .ir{display:flex;align-items:center;justify-content:space-between;min-height:32px;padding:2px 2px 0}
+#dlbar .cnt{font-size:12px;color:var(--faint);white-space:nowrap}
+#dlbar .rs{height:28px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:none;color:#3c3f46;font-size:13px;font-weight:600}
+#dlbar .rs[hidden]{display:none}
+.status_select.search .sort_option,.search_tag_wrap,a.btn_page{display:none!important}
 
 .dlx{position:absolute;top:0;left:0;width:100%;height:100%;z-index:30;visibility:visible!important;opacity:1!important;display:block!important;overflow:hidden;box-sizing:border-box;pointer-events:none;font-size:12px;line-height:1.3}
 .dlx *{box-sizing:border-box}
 .dlx>*{pointer-events:auto}
-.dlrow{display:flex!important;align-items:center;gap:6px;margin:4px 0 2px!important;padding:0 2px!important;min-height:26px;list-style:none;font:700 11px/1 "Pretendard Variable",Pretendard,system-ui,sans-serif;color:#555}
+.dlrow{display:flex!important;align-items:center;gap:6px;margin:2px 0 0!important;padding:0 2px!important;min-height:20px;list-style:none;font:700 11px/1 "Pretendard Variable",Pretendard,system-ui,sans-serif;color:#555}
 .dlrow .dlpn{white-space:nowrap;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .dlrow .dlpn.ok{color:#2e7d32}
 .dlrow .dlcpn{display:inline-flex;align-items:center;gap:2px;color:#2f80d1;white-space:nowrap}
 .dlrow .dlcpn svg{width:13px;height:13px;fill:currentColor}
 .dlrow .dlcpn.c3{color:#e5322d}.dlrow .dlcpn.c2{color:#f07800}.dlrow .dlcpn.bk{color:#7b3fd1}
-.dlrow .dlfav{flex:none;margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:30px;height:26px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dlrow .dlfav{flex:none;margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:30px;height:20px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dlrow .dlfav svg{width:20px;height:20px;fill:none;stroke:#9a9aa0;stroke-width:70}
 .dlrow .dlfav.on svg{fill:#e8336d;stroke:#e8336d}
 .dlrow .dlfav.err svg{stroke:#e5322d}
 .dlrow .dlfav[disabled]{opacity:.5}
+li.n_work_list_item .item_btn_box,li.n_work_list_item .n_sale_state{display:none!important}
+li.n_work_list_item dt.n_work_thumb{margin-bottom:2px!important}
+.dlsl{display:inline-flex;align-items:center;align-self:center;height:18px;margin:4px 0 0 5px;padding:0 5px;border-radius:3px;background:#e5322d;color:#fff;font:700 11px/1 system-ui,sans-serif;white-space:nowrap}
 .dlx .dlbd{position:absolute;left:0;right:0;bottom:0;pointer-events:none;display:flex;align-items:center;justify-content:space-between;gap:4px;height:24px;padding:0 6px;background:rgba(20,20,24,.72)}
 .dlx .dlbd.bare{left:auto;background:none}
 .dlx .dlva{min-width:0;color:#fff;font-size:10px;font-weight:700;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -2367,56 +2584,85 @@
 #dlsheet [aria-checked=true] .bx{background:#1a56db;border-color:#1a56db}
 #dlsheet [aria-checked=true] .bx svg{visibility:visible}
 
-#dlh{position:fixed;right:8px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:2147483000;font-size:14px;line-height:1.45;color:var(--ink)}
-#dlh .fab{position:relative;z-index:1;width:56px;height:56px;padding:0;margin:0;border:0;display:flex;align-items:center;justify-content:center;text-align:center;text-indent:0;letter-spacing:0;line-height:1;border-radius:50%;background:var(--ink);color:#fff;font-size:15px;font-weight:700;opacity:1;outline:0;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 4px 14px rgba(0,0,0,.35)}
-#dlh .fab:focus,#dlh .fab:focus-visible{outline:0}
+#dlh{position:fixed;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:2147483000;display:flex;justify-content:center;gap:10px;pointer-events:none;font-size:14px;line-height:1.45;color:var(--ink)}
+#dlh[hidden]{display:none}
+#dlh .fab,#dlh .fb{pointer-events:auto;display:flex;align-items:center;gap:8px;height:52px;margin:0;border-radius:26px;font-size:15px;font-weight:600;line-height:1;outline:0;box-shadow:0 4px 14px rgba(0,0,0,.28);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+#dlh .fab{padding:0 16px;border:2px solid #2b59d0;background:#fff;color:var(--sub);font-size:14px}
+#dlh .fab .on{color:var(--ink);font-weight:700}
+#dlh .fab .gp{color:#b5bbcb}
+#dlh .fb{padding:0 20px;border:0;background:var(--ink);color:#fff}
+#dlh .fb[hidden]{display:none}
+#dlh .fb.ap{background:#2b59d0}
+#dlh .fb svg{width:20px;height:20px;fill:currentColor}
+#dlh .fb b{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:11px;background:#2b59d0;color:#fff;font-size:13px}
+#dlh .fb.ap b{background:#fff;color:#2b59d0}
 #dlh .bk{position:fixed;inset:0;z-index:2;background:rgba(12,14,20,.45);opacity:0;pointer-events:none;transition:opacity .25s}
 #dlh.open .bk{opacity:1;pointer-events:auto}
-#dlh .pnl{position:fixed;left:0;right:0;bottom:0;z-index:3;display:flex;flex-direction:column;max-width:560px;max-height:88vh;margin:0 auto;background:#fff;border-radius:24px 24px 0 0;box-shadow:0 -8px 28px rgba(0,0,0,.2);transform:translateY(100%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s .28s}
+#dlh .pnl{position:fixed;left:0;right:0;bottom:0;z-index:3;display:flex;flex-direction:column;max-width:560px;max-height:90vh;margin:0 auto;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -8px 28px rgba(0,0,0,.2);transform:translateY(100%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s .28s;pointer-events:auto}
 #dlh.open .pnl{transform:none;visibility:visible;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
-#dlh .grab{flex:none;width:36px;height:4px;margin:8px auto 0;border-radius:999px;background:#d4d4d8}
-#dlh .hd{flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 16px}
-#dlh .hd b{font-size:16px;font-weight:700}
-#dlh .x{width:40px;height:40px;border:0;border-radius:50%;background:none;color:var(--faint);font-size:18px}
-#dlh .sc{flex:none;display:flex;gap:6px;padding:2px 16px 8px;overflow-x:auto;scrollbar-width:none}
-#dlh .sc::-webkit-scrollbar{display:none}
-#dlh .ch{flex:none;display:inline-flex;align-items:center;height:28px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--sub);font-size:13px;font-weight:600;line-height:1;text-decoration:none;white-space:nowrap}
-#dlh .bd{flex:1;min-height:0;overflow:auto;padding:0 16px calc(12px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
-#dlh h4{margin:6px 0 4px;font-size:13px;color:var(--faint);font-weight:600}
-#dlh h4:first-child{margin-top:0}
-#dlh .row{display:flex;flex-wrap:wrap;gap:8px}
-#dlh .c{height:40px;padding:0 15px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--sub);font-size:14px;font-weight:600}
-#dlh .c.on{background:var(--ink);border-color:var(--ink);color:#fff}
-#dlh details.adv{margin:0;padding:0;border-bottom:1px solid var(--line)}
-#dlh details.adv:last-child{border-bottom:0}
-#dlh details.adv[open]{padding-bottom:6px}
-#dlh details.adv>summary{user-select:none;-webkit-user-select:none;outline:0;display:flex;align-items:center;gap:8px;min-height:40px;font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;list-style:none}
-#dlh details.adv>summary::-webkit-details-marker{display:none}
-#dlh details.adv>summary::before{content:'▶';font-size:11px;color:var(--faint);transition:transform .15s}
-#dlh details.adv[open]>summary::before{transform:rotate(90deg)}
-#dlh label{display:flex;gap:10px;align-items:center;min-height:40px;font-size:14px;color:var(--ink)}
-#dlh button.tg{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:0;margin:0;padding:9px 0;border:0;border-bottom:1px solid #f2f2f4;border-radius:0;background:none;font-size:14px;font-weight:500;color:var(--ink);text-align:left;cursor:pointer}
-#dlh button.tg:last-child{border-bottom:0}
-#dlh .tg .tl{flex:1;min-width:0}
-#dlh .sw{position:relative;display:block;flex:none;width:40px;height:24px;border-radius:999px;background:#e3e3e6;transition:background .2s}
-#dlh .kn{position:absolute;top:2px;left:2px;display:block;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .2s}
-#dlh textarea.pref{display:block;width:100%;margin-top:4px;padding:10px 12px;border:0;border-radius:12px;background:#f4f4f5;color:var(--ink);font:inherit;font-size:15px;resize:vertical}
-#dlh .evs{padding-bottom:6px;border-bottom:1px solid var(--line)}
-#dlh .evs h4{margin:8px 0 2px;font-size:13px;font-weight:700;color:var(--sub)}
-#dlh .evl{max-height:30vh;overflow:auto;-webkit-overflow-scrolling:touch}
-#dlh a.ev{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:14px}
-#dlh .mut{color:var(--faint);font-size:13px}
-#dlh .ev .rts{flex:none;display:flex;flex-direction:column;gap:4px;align-items:stretch}
-#dlh .ev .rt{min-width:64px;padding:5px 9px;border-radius:8px;background:var(--red);color:#fff;font-size:15px;font-weight:800;line-height:1.15;text-align:center;white-space:nowrap}
-#dlh .ev .et{flex:1;min-width:0}
-#dlh .ev .et i{display:block;font-style:normal;font-size:12px;color:var(--faint)}
-#dlh .chl{margin:2px 0 6px}
-#dlh .chr{display:flex;align-items:center;gap:10px;min-height:44px;border-bottom:1px solid #f2f2f4;background:#fff}
-#dlh .chr.drag{box-shadow:0 4px 14px rgba(0,0,0,.18);position:relative;z-index:1}
-#dlh .chr .hd2{flex:none;width:36px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--faint);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
-#dlh .chr .tl{flex:1}
-#dlh .chr button{height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--sub);font-size:13px;font-weight:600}
-#dlh .chr button.on{background:#e3ebfc;border-color:#b9cdf5;color:#1a56db}
+#dlh .grab{flex:none;width:40px;height:4px;margin:8px auto 0;border-radius:999px;background:#c9cedb}
+#dlh .hd{flex:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:2px 6px 2px 16px}
+#dlh .hd h2{display:flex;align-items:center;margin:0;font-size:17px;font-weight:800;color:var(--ink)}
+#dlh .x{width:40px;height:40px;border:0;border-radius:50%;background:none;color:#333;font-size:18px}
+#dlh .x.gr{font-size:20px}
+#dlh .x.bkb{width:32px;margin-left:-10px;font-size:24px;line-height:1}
+#dlh .bd{flex:1;min-height:0;overflow:auto;padding:0 16px calc(14px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+#dlh .bd.gray{background:#f6f7fb;padding-top:8px}
+#dlh .gt{margin:14px 4px 6px;font-size:13px;font-weight:800;color:var(--ink)}
+#dlh .bd>.gt:first-child{margin-top:4px}
+#dlh .grp{background:#fff;border-radius:12px;padding:0 12px}
+#dlh .bd:not(.gray) .grp{background:#f6f7fb;margin-top:8px}
+#dlh .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+#dlh .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;height:64px;padding:0 4px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:12px;text-decoration:none}
+#dlh .tile .ti{font-size:20px;line-height:1}
+#dlh .tile .tn{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#dlh .evl{max-height:34vh;overflow:auto;-webkit-overflow-scrolling:touch}
+#dlh a.ev{display:block;padding:10px 0;border-bottom:1px solid #eef0f5;color:var(--ink);text-decoration:none;font-size:13.5px;line-height:1.4}
+#dlh a.ev:last-child{border-bottom:0}
+#dlh .ev .rts{display:inline}
+#dlh .ev .rt{display:inline-block;margin-right:5px;padding:1px 6px;border-radius:4px;background:#d93a2f;color:#fff;font-size:11.5px;font-weight:700;vertical-align:1px}
+#dlh .ev .et{display:inline}
+#dlh .ev .et i{display:block;margin-top:2px;font-style:normal;font-size:11.5px;color:var(--sub)}
+#dlh .mut{color:var(--faint);font-size:13px;padding:14px 0;text-align:center}
+#dlh button.tg{width:100%;margin:0;border-radius:0;background:none;font:inherit;text-align:left;cursor:pointer}
+#dlh .tg{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:0;border:0;border-bottom:1px solid #eef0f5;font-size:14px;color:var(--ink)}
+#dlh .grp>.tg:last-child{border-bottom:0}
+#dlh .tg .tl{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+#dlh .bdg{flex:none;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#e1e9fc;color:#1f46a8;font-size:14px}
+#dlh .chv{color:var(--faint);font-size:20px}
+#dlh .sw{position:relative;display:block;flex:none;width:42px;height:24px;border-radius:999px;background:#c9cedb;transition:background .15s}
+#dlh .sw.y{background:#2b59d0}
+#dlh .kn{position:absolute;top:2px;left:2px;display:block;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s}
+#dlh .sw.y .kn{transform:translateX(18px)}
+#dlh .seg{display:inline-flex;padding:3px;border-radius:10px;background:#eef0f5}
+#dlh .seg button{min-height:32px;padding:0 12px;border:0;border-radius:8px;background:none;color:var(--sub);font-size:13px;font-weight:600}
+#dlh .seg button.o{background:#2b59d0;color:#fff}
+#dlh .fld{width:100%;height:42px;padding:0 12px;border:1px solid #c9cedb;border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:16px}
+#dlh .addr{display:flex;gap:8px;margin-top:10px}
+#dlh .addb{flex:none;width:64px;height:42px;border:0;border-radius:10px;background:#2b59d0;color:#fff;font-weight:700}
+#dlh .del{flex:none;width:40px;height:40px;border:0;background:none;color:var(--sub);font-size:15px}
+#dlh .grip{flex:none;display:flex;align-items:center;justify-content:center;width:36px;height:40px;color:var(--faint);font-size:20px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#dlh .sr.drag{opacity:.6}
+#dlh .pri{width:100%;min-height:46px;margin-top:12px;border:0;border-radius:12px;background:#2b59d0;color:#fff;font-weight:700;font-size:14px}
+#dlh .frm{display:flex;flex-direction:column;gap:10px;padding:12px}
+#dlh .lnk{align-self:flex-end;border:0;background:none;color:#1f46a8;font-size:13px;font-weight:600}
+#dlh .flt{padding:0}
+#dlh .band{padding:7px 16px;background:#eef0f5;font-size:12.5px;font-weight:700;color:var(--ink)}
+#dlh .pad{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px}
+#dlh .op{display:inline-flex;align-items:center;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:13.5px;font-weight:600}
+#dlh .op.on{border:1.5px solid #2b59d0;background:#e1e9fc;color:#1f46a8}
+#dlh .gn{padding:0 16px;border-bottom:0}
+#dlh .gn .tl{color:var(--ink)}
+#dlh .gn .tl.mut{padding:0;text-align:left}
+#dlh .ft{flex:none;display:flex;gap:8px;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+#dlh .ft button{height:46px;border:0;border-radius:12px;font-weight:700;font-size:14px}
+#dlh .ft .svb{width:52px;background:#e1e9fc;font-size:18px}
+#dlh .ft .rsb{flex:1;background:#eef0f5;color:var(--ink)}
+#dlh .ft .gob{flex:2;background:#2b59d0;color:#fff}
+#dlh .gl .li{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;width:100%;min-height:46px;padding:6px 4px;border:0;border-bottom:1px solid #eef0f5;background:none;color:var(--ink);text-align:left}
+#dlh .gl .li.on .pt{color:#1a56db;font-weight:700}
+#dlh .gl .ps{font-size:12px;color:var(--faint)}
+#dlh .bd>.fld{margin-top:4px}
 
 #dlsale{display:flex;align-items:flex-start;gap:8px;overflow-x:auto;width:100%;box-sizing:border-box;padding:8px 12px;margin:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 #dlsale::-webkit-scrollbar{display:none}
@@ -2428,116 +2674,40 @@
     const root = el('div', { id: 'dlh' });
     const reload = () => location.reload();
     const applyLang = () => { locale.clearReloadGuards(); locale.write(locale.wantFor(location.pathname)); reload(); };
+    const swi = (on) => el('span', { class: 'sw' + (on ? ' y' : ''), 'aria-hidden': 'true' }, el('span', { class: 'kn' }));
     const chk = (key, text, after) => {
-      let on = !!opt(key);
-      const kn = el('span', { class: 'kn' });
-      const sw = el('span', { class: 'sw', 'aria-hidden': 'true' }, kn);
-      const b = el('button', { class: 'tg', role: 'switch' }, el('span', { class: 'tl' }, text), sw);
-      const paint = () => {
-        b.setAttribute('aria-checked', String(on));
-        sw.style.background = on ? '#34c759' : '#e3e3e6';
-        kn.style.transform = on ? 'translateX(16px)' : 'translateX(0)';
-      };
+      const b = el('button', { class: 'tg', role: 'switch', 'aria-checked': String(!!opt(key)) }, el('span', { class: 'tl' }, text), swi(!!opt(key)));
       b.addEventListener('click', (e) => {
         e.stopPropagation();
-        on = !on;
+        const on = !opt(key);
         store.set(key, on);
-        paint();
+        b.setAttribute('aria-checked', String(on));
+        b.lastChild.classList.toggle('y', on);
         if (after === reload || after === applyLang) setTimeout(after, 250); else after();
       });
-      paint();
       return b;
     };
     const evBox = el('div', { class: 'evl' });
-    // 칩 순서·보이기: ≡를 끌어 순서, 오른쪽 버튼으로 보이기·숨기기. 바꾸면 바를 다시 그린다
-    const chipList = el('div', { class: 'chl' });
-    const remountBar = () => { document.getElementById('dlbar')?.remove(); list.mount(); };
-    const paintChips = () => {
-      const hid = chipHidden();
-      chipList.replaceChildren(...chipOrder().map((k) => {
-        const on = !hid.includes(k);
-        const h = el('span', { class: 'hd2', 'aria-hidden': 'true' }, '≡');
-        const b = el('button', { class: on ? 'on' : '', 'aria-pressed': String(on), onclick: () => {
-          store.set('chips.hidden', on ? [...hid, k] : hid.filter((x) => x !== k));
-          paintChips(); remountBar();
-        } }, on ? '보임' : '숨김');
-        const row = el('div', { class: 'chr', 'data-k': k }, h, el('span', { class: 'tl' }, (CHIPS.find((x) => x[0] === k) || [k, k])[1]), b);
-        h.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
-          row.classList.add('drag');
-          const move = (ev) => {
-            for (const r of chipList.children) {
-              if (r === row) continue;
-              const rc = r.getBoundingClientRect();
-              if (ev.clientY < rc.top + rc.height / 2) { if (r.previousElementSibling !== row) chipList.insertBefore(row, r); return; }
-            }
-            if (chipList.lastElementChild !== row) chipList.append(row);
-          };
-          const up = () => {
-            window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-            row.classList.remove('drag');
-            const order = [...chipList.children].map((r) => r.dataset.k);
-            if (order.join() !== chipOrder().join()) { store.set('chips.order', order); remountBar(); }
-          };
-          window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up); // 손가락이 ≡ 밖으로 나가도 받게(Play 버튼과 같은 방식)
-        });
-        return row;
-      }));
-    };
-    paintChips();
     let evLoaded = false;
     let openedAt = 0;
-    const sec = (title, opened, ...kids) => el('details', Object.assign({ class: 'adv' }, opened ? { open: '' } : {}), el('summary', {}, title), ...kids);
-    const evSec = el('div', { class: 'evs' }, el('h4', {}, '일본 한정 이벤트'), evBox);
     const ensureEv = () => { if (!evLoaded) { evLoaded = true; loadEvents(evBox); } };
-    const setOpen = (open) => {
-      root.classList.toggle('open', open);
-      if (open) { openedAt = Date.now(); ensureEv(); }
-    };
-    const fab = el('button', { class: 'fab', 'aria-label': '탭: 한/일 전환 · 꾹: 설정' }, opt('locale').slice(0, 2).toUpperCase());
+    // 아래 알약: 짧게 = 한/일 전환, 꾹 = 메뉴. 끌어서 옮기기는 없다(0.41.0: 사용자가 위치 고정을 원함). 스크롤해도 숨지 않고 고정(0.42.1)
+    const ja = () => opt('locale') === 'ja_JP';
+    const fab = el('button', { class: 'fab', 'aria-label': '탭: 한/일 전환 · 꾹: 메뉴' });
+    const paintFab = () => fab.replaceChildren(el('span', { class: ja() ? 'on' : '' }, '日本語'), el('span', { class: 'gp' }, '/'), el('span', { class: ja() ? '' : 'on' }, '한국어'));
     const toggleLang = () => {
       const now = opt('locale');
       if (now === 'ja_JP') store.set('locale', store.get('locale.prev', 'ko_KR') || 'ko_KR');
       else { store.set('locale.prev', now); store.set('locale', 'ja_JP'); }
       applyLang();
     };
-    const vw = () => document.documentElement.clientWidth || innerWidth; // 스크롤바를 뺀 폭(fixed 요소의 기준)
-    let at = null;
-    pressable(fab, toggleLang, () => setOpen(true), {
-      start() { const r = root.getBoundingClientRect(); at = { l: r.left, t: r.top, w: r.width, h: r.height }; },
-      move(dx, dy) {
-        const st = root.style;
-        st.right = st.bottom = 'auto';
-        st.left = Math.min(Math.max(at.l + dx, 0), Math.max(vw() - at.w, 0)) + 'px';
-        st.top = Math.min(Math.max(at.t + dy, 0), Math.max(innerHeight - at.h, 0)) + 'px';
-      },
-      end() {
-        const r = root.getBoundingClientRect();
-        store.set('fab.xy', { l: Math.round(r.left), t: Math.round(r.top) });
-      },
-    }, FAB_LONG_MS);
-    root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && root.classList.contains('open')) setOpen(false); });
-    const applyPos = () => {
-      const st = root.style;
-      st.left = st.right = st.top = st.bottom = 'auto';
-      const xy = opt('fab.xy');
-      const w = root.offsetWidth || 56, h = root.offsetHeight || 56;
-      if (xy && typeof xy.l === 'number' && typeof xy.t === 'number') { // px 값: 화면 안으로만 눌러 넣는다(저장값은 그대로)
-        st.left = Math.min(Math.max(xy.l, 0), Math.max(vw() - w, 0)) + 'px';
-        st.top = Math.min(Math.max(xy.t, 0), Math.max(innerHeight - h, 0)) + 'px';
-        return;
-      }
-      if (xy && typeof xy.x === 'number' && typeof xy.y === 'number') { // 예전 비율 값
-        st.left = Math.round(Math.min(Math.max(xy.x, 0), 1) * Math.max(vw() - w, 0)) + 'px';
-        st.top = Math.round(Math.min(Math.max(xy.y, 0), 1) * Math.max(innerHeight - h, 0)) + 'px';
-        return;
-      }
-      const k = opt('fab.pos');
-      if (k === 'lm') st.left = '4px'; else st.right = '4px';
-      if (k === 'rb') st.bottom = 'calc(78px + env(safe-area-inset-bottom,0px))';
-      else if (k === 'rt') st.top = '130px';
-      else st.top = '50%';
-    };
+    pressable(fab, toggleLang, () => setOpen(true, 'menu'), null, FAB_LONG_MS);
+    paintFab();
+    // 필터 N / 적용: 목록 화면이면 늘 보인다(list.syncFab). 적용 대기 중이면 적용, 아니면 우리 필터 창
+    const fb = el('button', { class: 'fb', id: 'dlfb', hidden: '', onclick: () => { if (list.staged) list.onApply(); else setOpen(true, 'filter'); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && root.classList.contains('open')) setOpen(false); }); // 패널 밖에 포커스가 있어도 닫히게
+
+    // 바로가기: 저장은 예전 그대로 'shortcuts.custom'에 '이모지 이름|주소' 줄들(비면 기본). 이름 앞 이모지가 칸 아이콘
     const defaultLines = () => SHORTCUTS.map(([i, n, u]) => `${i} ${n}|${u}`).join('\n');
     const parseShortcuts = (txt) => {
       const out = [];
@@ -2555,56 +2725,173 @@
       const c = parseShortcuts(store.get('shortcuts.custom', ''));
       return c.length ? c : SHORTCUTS.map(([i, n, u]) => [`${i} ${n}`, u]);
     };
-    const shortcuts = el('div', { class: 'sc' });
-    const paintShortcuts = () => shortcuts.replaceChildren(...curShortcuts().map(([label, url]) => el('a', { class: 'ch', href: url }, label)));
-    paintShortcuts();
-    const scArea = el('textarea', { class: 'pref', rows: '3', placeholder: '👤 마이페이지|https://www.dlsite.com/...', 'aria-label': '바로가기 편집(이름|주소)' });
-    scArea.value = store.get('shortcuts.custom', '') || defaultLines();
-    const scSave = el('button', { class: 'c', onclick: () => {
-      const v = scArea.value.trim();
-      store.set('shortcuts.custom', parseShortcuts(v).length && v !== defaultLines() ? v : '');
-      paintShortcuts();
-      if (!parseShortcuts(v).length) scArea.value = defaultLines();
-    } }, '바로가기 저장');
-    const blArea = el('textarea', { class: 'pref', rows: '3', 'aria-label': '차단 목록' });
-    blArea.value = store.get('block.list', '');
-    const blSave = el('button', { class: 'c', onclick: () => { store.set('block.list', blArea.value.trim()); blockSet.cache = null; list.apply(); } }, '차단 저장');
-    const body = el('div', { class: 'bd' },
-      evSec,
-      sec('설정', false, el('div', { class: 'lst' },
-        chk('autoJa', '이벤트 페이지 일본어 자동', applyLang),
-        chk('hideBanners', '할인 외 배너 숨기기', clean.resetBanners),
-        chk('saleStrip', '일본 할인 배너 표시', reload),
-        chk('onlyTlBl', 'TL/BL 층만 보이기', reload),
-        chk('hideCouponPop', '쿠폰 팝업 숨기기', reload),
-        chk('showVA', '목록에 성우(CV) 표시', reload),
-        chk('hideAI', 'AI 생성 작품 숨기기', () => list.apply()),
-        chk('saleOnly', '검색은 할인중만 (쿠폰 대상 제외)', reload),
-        chk('koDefault', '검색은 한국어 작품만 (언어 안 정했을 때)', reload),
-        chk('searchJa', '검색 결과는 일본어로', reload)),
-        el('h4', {}, '칩 (≡ 끌어서 순서)'), chipList,
-        el('h4', {}, '바로가기 (이름|주소)'), scArea, el('div', { class: 'row' }, scSave),
-        el('h4', {}, '차단 (서클·성우·작가, 한 줄에 하나)'), blArea, el('div', { class: 'row' }, blSave)),
-      sec('상태', false,
-      el('div', { class: 'mut', id: 'dlh-va' }),
-      el('div', { class: 'mut', id: 'dlh-cp' }, '쿠폰: 쿠폰 목록 페이지에서 확인돼요'),
-      el('div', { class: 'mut', id: 'dlh-cs' }),
-      el('div', { class: 'mut', id: 'dlh-hid' }),
-      el('div', { class: 'mut', id: 'dlh-st' }),
-      el('div', { class: 'mut' }, '현재 쿠키: ' + (locale.read() || '없음')),
-      el('div', { class: 'mut' }, '쿠키 이름들: ' + ((() => { try { return document.cookie; } catch (e) { return ''; } })().split('; ').map((c) => c.split('=')[0]).filter(Boolean).join(', ') || '없음')),
-      el('div', { class: 'mut' }, '사이트 언어 선택값: ' + ((document.querySelector('select.lang_currency_select') || {}).value || '못 찾음'))));
-    const pnl = el('div', { class: 'pnl', id: 'dlh-pnl', role: 'dialog', 'aria-modal': 'true', 'aria-label': '설정' },
-      el('div', { class: 'grab' }),
-      el('div', { class: 'hd' }, el('b', {}, '설정'),
-        el('button', { class: 'x', 'aria-label': '닫기', onclick: () => setOpen(false) }, '✕')),
-      shortcuts,
-      body);
+    const saveShortcuts = (arr) => { const v = arr.map(([l, u]) => `${l}|${u}`).join('\n'); store.set('shortcuts.custom', v === defaultLines() ? '' : v); };
+    const splitIcon = (label) => { const m = label.match(/^(\S+)\s+(.+)$/); return m && !/[\p{L}\p{N}]/u.test(m[1]) ? [m[1], m[2]] : ['', label]; };
+
+    // 차단: 이름 목록은 예전 그대로 'block.list'(한 줄에 하나, 숨기는 규칙도 그대로). 칸 나눔(서클·성우·작가)만 'block.kind'에 따로. 종류를 모르는 예전 이름은 서클 칸
+    const KINDS = ['서클', '성우', '작가'];
+    const blNames = () => String(store.get('block.list', '')).split('\n').map((x) => x.trim()).filter(Boolean);
+    const blKinds = () => { const v = store.get('block.kind', {}); return v && typeof v === 'object' ? v : {}; };
+    const blSave = (names, kinds) => { store.set('block.list', names.join('\n')); store.set('block.kind', kinds); blockSet.cache = null; list.apply(); };
+
+    const pnl = el('div', { class: 'pnl', id: 'dlh-pnl', role: 'dialog', 'aria-modal': 'true', 'aria-label': '메뉴' });
+    let view = 'menu', blTab = KINDS[0], fsel = null, fspec = null, draft = { n: '', u: '', b: '' };
+    const go = (v) => { view = v; render(); };
+    const close = el('button', { class: 'x', 'aria-label': '닫기', onclick: () => setOpen(false) }, '✕');
+    const head = (title, backTo, right) => el('div', { class: 'hd' },
+      el('h2', {}, backTo ? el('button', { class: 'x bkb', 'aria-label': '뒤로', onclick: () => go(backTo) }, '‹') : null, title), right || close);
+    const gt = (t) => el('div', { class: 'gt' }, t);
+    const grp = (...kids) => el('div', { class: 'grp' }, ...kids);
+    const navRow = (ic, t, v) => el('button', { class: 'tg nv', onclick: () => go(v) }, el('span', { class: 'tl' }, el('span', { class: 'bdg' }, ic), t), el('span', { class: 'chv' }, '›'));
+    const opt2 = (t, on, onclick) => el('button', { class: 'op' + (on ? ' on' : ''), 'aria-pressed': String(!!on), onclick }, on ? '✓ ' + t : t);
+    const tagName = (n) => { const t = kw.list().find((x) => x[0] === n); return t ? t[1] : n; };
+
+    const views = {
+      menu: () => [head('메뉴', null, el('button', { class: 'x gr', 'aria-label': '설정', onclick: () => go('settings') }, '⚙')),
+        el('div', { class: 'bd' }, gt('바로가기'),
+          el('div', { class: 'tiles' }, ...curShortcuts().map(([label, url]) => { const [ic, nm] = splitIcon(label); return el('a', { class: 'tile', href: url }, el('span', { class: 'ti' }, ic || '🔗'), el('span', { class: 'tn' }, nm)); }),
+            el('button', { class: 'tile', onclick: () => go('blocks') }, el('span', { class: 'ti' }, '🛡'), el('span', { class: 'tn' }, '차단목록'))),
+          gt('이벤트'), evBox)],
+      settings: () => [head('설정', 'menu'),
+        el('div', { class: 'bd gray' },
+          grp(navRow('⊘', '차단 목록', 'blocks'), navRow('🔖', '바로가기 편집', 'shortcuts')),
+          gt('이벤트 · 배너'),
+          grp(chk('autoJa', '이벤트 페이지 일본어 자동', applyLang), chk('hideBanners', '할인 외 배너 숨기기', clean.resetBanners), chk('saleStrip', '일본 할인 배너 표시', reload), chk('hideCouponPop', '쿠폰 팝업 숨기기', reload)),
+          gt('작품 표시'),
+          grp(chk('showVA', '목록에 성우(CV) 표시', reload), chk('hideAI', 'AI 생성 작품 숨기기', () => list.apply()), chk('onlyTlBl', 'TL/BL 층만 보이기', reload)),
+          gt('검색'),
+          grp(chk('saleOnly', '할인중인 작품만 검색', reload), chk('koDefault', '한국어 작품만 (언어 안 정했을 때)', reload), chk('searchJa', '검색 결과는 일본어로', reload),
+            el('div', { class: 'tg' }, el('span', { class: 'tl' }, '화면 언어'), el('span', { class: 'seg' }, ...[['한국어', false], ['日本語', true]].map(([t, j]) =>
+              el('button', { class: ja() === j ? 'o' : '', 'aria-pressed': String(ja() === j), onclick: () => { if (ja() !== j) toggleLang(); } }, t))))))],
+      blocks: () => {
+        const names = blNames(), kinds = blKinds();
+        const inp = el('input', { class: 'fld', id: 'dlh-bl', placeholder: '이름', 'aria-label': '차단할 이름', value: draft.b });
+        inp.addEventListener('input', () => { draft.b = inp.value; });
+        const add = () => {
+          const v = inp.value.trim();
+          if (!v) return;
+          if (!names.some((x) => normName(x) === normName(v))) names.push(v);
+          kinds[v] = blTab;
+          draft.b = '';
+          blSave(names, kinds);
+          render();
+        };
+        inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') add(); });
+        const mine = names.filter((n) => (kinds[n] || KINDS[0]) === blTab);
+        return [head('차단', 'settings'),
+          el('div', { class: 'bd' },
+            el('div', { class: 'seg' }, ...KINDS.map((k) => el('button', { class: k === blTab ? 'o' : '', 'aria-pressed': String(k === blTab), onclick: () => { blTab = k; render(); } }, k))),
+            el('div', { class: 'addr' }, inp, el('button', { class: 'addb', onclick: add }, '추가')),
+            grp(...(mine.length ? mine.map((n) => el('div', { class: 'tg' }, el('span', { class: 'tl' }, n),
+              el('button', { class: 'del', 'aria-label': n + ' 차단 해제', onclick: () => { const k2 = { ...kinds }; delete k2[n]; blSave(names.filter((x) => x !== n), k2); render(); } }, '✕')))
+              : [el('div', { class: 'mut' }, `차단한 ${blTab} 없음`)])))];
+      },
+      shortcuts: () => {
+        const arr = curShortcuts();
+        const lst = grp(...arr.map(([label, url], i) => { const [ic, nm] = splitIcon(label); return el('div', { class: 'tg sr', 'data-i': String(i) },
+          el('span', { class: 'tl' }, el('span', { class: 'bdg' }, ic || '🔗'), nm),
+          el('span', { class: 'grip', 'aria-label': '끌어서 순서 바꾸기' }, '≡'),
+          el('button', { class: 'del', 'aria-label': nm + ' 지우기', onclick: () => { saveShortcuts(arr.filter((_, j) => j !== i)); render(); } }, '🗑')); }));
+        // ≡ 끌기: 손가락 위치가 옆 줄의 가운데를 넘으면 자리를 바꾸고, 놓으면 그 순서로 저장
+        lst.addEventListener('pointerdown', (e) => {
+          const h = e.target.closest('.grip');
+          if (!h) return;
+          const row = h.closest('.sr');
+          e.preventDefault();
+          h.setPointerCapture(e.pointerId);
+          row.classList.add('drag');
+          const move = (ev) => {
+            const prev = row.previousElementSibling, next = row.nextElementSibling;
+            if (prev && ev.clientY < prev.getBoundingClientRect().top + prev.offsetHeight / 2) lst.insertBefore(row, prev);
+            else if (next && ev.clientY > next.getBoundingClientRect().top + next.offsetHeight / 2) lst.insertBefore(next, row);
+          };
+          const up = () => {
+            h.removeEventListener('pointermove', move); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up);
+            saveShortcuts([...lst.children].map((r) => arr[+r.dataset.i]));
+            render();
+          };
+          h.addEventListener('pointermove', move); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+        });
+        return [head('바로가기 편집', 'settings'),
+          el('div', { class: 'bd gray' }, arr.length ? lst : el('div', { class: 'mut' }, '바로가기 없음'),
+            el('button', { class: 'pri', onclick: () => go('scadd') }, '+ 바로가기 추가'))];
+      },
+      scadd: () => {
+        const n = el('input', { class: 'fld', placeholder: '이름 (앞에 이모지를 쓰면 아이콘, 예: 🎁 쿠폰함)', 'aria-label': '바로가기 이름', value: draft.n });
+        const u = el('input', { class: 'fld', placeholder: 'https://', 'aria-label': '바로가기 주소', value: draft.u });
+        n.addEventListener('input', () => { draft.n = n.value; });
+        u.addEventListener('input', () => { draft.u = u.value; });
+        const save = () => {
+          const ok = parseShortcuts(`${n.value.trim()}|${u.value.trim()}`);
+          if (!ok.length) { u.focus(); return; }
+          saveShortcuts([...curShortcuts(), ok[0]]);
+          draft.n = draft.u = '';
+          go('shortcuts');
+        };
+        return [head('바로가기 추가', 'shortcuts'),
+          el('div', { class: 'bd gray' }, el('div', { class: 'grp frm' }, n, u,
+            el('button', { class: 'lnk', onclick: () => { u.value = draft.u = location.href; } }, '현재 페이지 주소 넣기')),
+          el('button', { class: 'pri', onclick: save }, '저장'))];
+      },
+      // 필터(우리 창, 0.42.0): 검색 화면은 대상·형식·장르·할인·언어를 골라 '검색하기'에서 주소 1번 이동. 검색이 아닌 목록은 할인만(이 쪽 안에서 거름)
+      filter: () => {
+        fspec = list.filterSpec ? list.filterSpec() : null;
+        if (!fspec) return [head('필터'), el('div', { class: 'bd' }, el('div', { class: 'mut' }, '이 화면에는 고를 조건이 없어요'))];
+        if (!fsel) fsel = JSON.parse(JSON.stringify(fspec.cur));
+        const s = fsel;
+        const tog = (k, v) => () => { s[k] = s[k].includes(v) ? s[k].filter((x) => x !== v) : [...s[k], v]; render(); };
+        const sale = (r) => () => { const on = r ? s.rate === r : s.sale && !s.rate; s.sale = !on; s.rate = on ? 0 : r; render(); };
+        const band = (t, ...kids) => [el('div', { class: 'band' }, t), el('div', { class: 'pad' }, ...kids)];
+        const body = el('div', { class: 'bd flt' },
+          ...(fspec.search ? [
+            ...band('대상', ...SEXES.map(([v, t]) => opt2(t, s.sex.includes(v), tog('sex', v)))),
+            ...band('작품 형식', ...FORMS.map(([v, t]) => opt2(t, s.forms.includes(v), tog('forms', v)))),
+            el('div', { class: 'band' }, '장르(태그)'),
+            el('button', { class: 'tg nv gn', onclick: () => go('genre') }, el('span', { class: 'tl' + (s.genres.length ? '' : ' mut') }, s.genres.length ? s.genres.map(tagName).join(', ') : '장르를 고르세요'), el('span', { class: 'chv' }, '›')),
+          ] : []),
+          ...band('할인', opt2('할인중', s.sale && !s.rate, sale(0)), ...[30, 50, 80].map((r) => opt2(r + '%↑', s.rate === r, sale(r)))),
+          ...(fspec.search ? band('언어', ...LANGS.map(([v, t]) => opt2(t.replace('중국어 ', ''), s.lang.includes(v), tog('lang', v)))) : []));
+        const foot = el('div', { class: 'ft' },
+          fspec.canSave ? el('button', { class: 'svb', 'aria-label': '지금 검색 조건 저장(사이트)', onclick: () => fspec.save() }, '🔖') : null,
+          el('button', { class: 'rsb', onclick: () => { fsel = JSON.parse(JSON.stringify(fspec.def)); render(); } }, '리셋'),
+          el('button', { class: 'gob', onclick: () => { const v = fsel; fsel = null; setOpen(false); fspec.run(v); } }, '검색하기'));
+        return [head('필터'), body, foot];
+      },
+      genre: () => {
+        const s = fsel;
+        const inp = el('input', { class: 'fld', type: 'search', placeholder: '태그 이름(한국어·일본어)', 'aria-label': '태그 찾기', value: draft.g || '' });
+        const lst = el('div', { class: 'gl' });
+        const draw = () => {
+          const v = inp.value.trim();
+          draft.g = v;
+          const rows = v ? tags.find(v) : tags.favs();
+          lst.replaceChildren(...rows.map(([n, ko, ja2]) => el('button', { class: 'li' + (s.genres.includes(n) ? ' on' : ''), 'aria-pressed': String(s.genres.includes(n)), onclick: () => { s.genres = s.genres.includes(n) ? s.genres.filter((x) => x !== n) : [...s.genres, n]; render(); } },
+            el('span', { class: 'pt' }, (s.genres.includes(n) ? '✓ ' : '') + ko), ko !== ja2 ? el('span', { class: 'ps' }, ja2) : null)));
+        };
+        inp.addEventListener('input', draw);
+        draw();
+        setTimeout(() => inp.focus(), 50);
+        return [head('장르(태그)', 'filter'),
+          el('div', { class: 'bd' }, inp,
+            s.genres.length ? el('div', { class: 'pad' }, ...s.genres.map((n) => el('button', { class: 'op on', onclick: () => { s.genres = s.genres.filter((x) => x !== n); render(); } }, tagName(n) + ' ✕'))) : null,
+            lst)];
+      },
+    };
+    const render = () => { pnl.dataset.v = view; pnl.replaceChildren(el('div', { class: 'grab' }), ...views[view]()); };
+    const setOpen = (open, v) => {
+      root.classList.toggle('open', open);
+      if (open) {
+        openedAt = Date.now();
+        if (v === 'filter') fsel = null;
+        go(v || 'menu');
+        if (view === 'menu') ensureEv();
+      }
+    };
+    list.openPanel = (v) => setOpen(true, v);
     const bk = el('div', { class: 'bk', onclick: () => { if (Date.now() - openedAt > 400) setOpen(false); } });
-    root.append(bk, pnl, fab);
-    applyPos();
-    window.addEventListener('resize', applyPos);
+    root.append(bk, pnl, fb, fab);
     document.documentElement.append(root);
+    list.syncFab();
   }
 
   /* ========== 10.5 play: DLsite Play 작품 숨기기(Play 자체 '비표시' 기능을 씀) ==========
@@ -2907,13 +3194,14 @@
     const h = document.getElementById('dlh');
     if (h && h.hidden !== on) h.hidden = on;
   }
-  // 사이트가 검색을 주소만 바꿔(pushState) 보여 주면 시작할 때 바꾸기가 안 돈다. 한국어 태그 이름 검색어면 그때 한 번 바꿔 연다(검색창에서 못 바꾼 경우만, 요청 +1)
+  // 사이트가 검색을 주소만 바꿔(pushState) 보여 주면 시작할 때 바꾸기(searchRedirectTarget)가 안 돈다(폰 검색 화면 안에서 다시 검색하면 정렬이 빠짐, 2026-11-02 실제 사이트).
+  // 그때 같은 계산으로 한 번 바꿔 연다(주소마다 1번, 요청 +1: 사이트가 이미 받은 결과 위에 문서 1번)
   function kwFix() {
     kw.tidyBox();
-    const np = route.isSearch(location.pathname) && kw.path(location.pathname);
-    if (!np) return;
+    const t = route.isSearch(location.pathname) && searchRedirectTarget();
+    if (!t) return;
     try { if (sessionStorage.getItem('dlh_kw') === location.href) return; sessionStorage.setItem('dlh_kw', location.href); } catch (e) { return; }
-    const u = new URL(location.href); u.pathname = np; location.replace(u.href);
+    location.replace(t);
   }
   function tidy() {
     ageGateHide();
